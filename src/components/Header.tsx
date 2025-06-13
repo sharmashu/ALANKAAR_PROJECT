@@ -32,10 +32,10 @@ export function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">ID</span>
+              <span className="text-white font-bold text-sm">A</span>
             </div>
             <span className="text-xl font-bold gradient-primary bg-clip-text text-transparent">
-              Interior Decor
+              ALANKAAR
             </span>
           </Link>
 

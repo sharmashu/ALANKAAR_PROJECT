@@ -11,10 +11,10 @@ export function Footer() {
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">ID</span>
+                <span className="text-white font-bold text-sm">A</span>
               </div>
               <span className="text-xl font-bold gradient-primary bg-clip-text text-transparent">
-                Interior Decor
+                ALANKAAR
               </span>
             </Link>
             <p className="text-sm text-muted-foreground">
@@ -48,7 +48,7 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold">Connect</h3>
             <div className="flex space-x-4">
-              <a href="mailto:info@interiorDecor.com" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="mailto:info@alankaar.com" className="text-muted-foreground hover:text-primary transition-colors">
                 <Mail className="h-5 w-5" />
               </a>
               <a href="https://wa.me/1234567890" className="text-muted-foreground hover:text-primary transition-colors">
@@ -62,7 +62,7 @@ export function Footer() {
         </div>
 
         <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 Interior Decor. All rights reserved.</p>
+          <p>&copy; 2024 ALANKAAR. All rights reserved.</p>
         </div>
       </div>
     </footer>
