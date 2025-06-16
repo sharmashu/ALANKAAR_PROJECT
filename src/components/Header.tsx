@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import logo from '@/images/logo3.1.png';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -30,13 +31,8 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <span className="text-xl font-bold gradient-primary bg-clip-text text-transparent">
-              ALANKAAR
-            </span>
+          <Link to="/" className="flex items-center" style={{ minWidth: '180px' }}>
+            <img src={logo} alt="Alankaar Logo" className="h-16 object-contain mt-2 -mx-2" style={{ width: '100%' }} />
           </Link>
 
           {/* Desktop Navigation */}
