@@ -7,22 +7,105 @@ import { ProductCard } from '@/components/ProductCard';
 import { categories, featuredProducts } from '@/data/mockData';
 
 export default function Index() {
+  // Sample poster images for the hero galleries
+  const posterGallery1 = [
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=300&h=400&fit=crop",
+  ];
+
+  const posterGallery2 = [
+    "https://images.unsplash.com/photo-1582561833949-7fffaaf8cc81?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=300&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1582561833949-7fffaaf8cc81?w=300&h=400&fit=crop",
+  ];
+
+  const offers = [
+    "BUY 4 GET 3 FREE!",
+    "BUY 5 GET 5 FREE!",
+    "BUY 6 GET 12 FREE!",
+    "BUY 10 GET 20 FREE!",
+    "BUY 20 GET 50 FREE!",
+    "FREE DELIVERY FOR PREPAID ORDERS!",
+    "BUY 4 GET 3 FREE!",
+    "BUY 5 GET 5 FREE!",
+    "BUY 6 GET 12 FREE!",
+  ];
+
   return (
     <div className="min-h-screen">
+      {/* Moving Offers Bar */}
+      <div className="bg-black text-white py-2 overflow-hidden">
+        <div className="animate-scroll-left whitespace-nowrap">
+          <div className="inline-flex space-x-8">
+            {[...offers, ...offers].map((offer, index) => (
+              <span key={index} className="text-sm font-medium">
+                {offer}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-background via-muted/30 to-accent/10 py-20 lg:py-32">
+      <section className="relative bg-white dark:bg-background py-8 lg:py-16 overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center space-y-8">
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-              Transform Your Space with{' '}
+          {/* Main Heading */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-black dark:text-white mb-4">
+              VIBE IT. PRINT IT.{' '}
               <span className="gradient-primary bg-clip-text text-transparent">
-                Premium Art
+                POSTERIZED.
               </span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Discover our curated collection of wall posters, custom prints, neon signs, and LED boards. 
-              Create your perfect interior with our premium quality products.
-            </p>
+          </div>
+
+          {/* First Row - Sliding Right to Left */}
+          <div className="mb-6 overflow-hidden">
+            <div className="animate-scroll-right whitespace-nowrap">
+              <div className="inline-flex space-x-4">
+                {[...posterGallery1, ...posterGallery1].map((image, index) => (
+                  <div key={index} className="relative flex-shrink-0">
+                    <img
+                      src={image}
+                      alt={`Poster ${index + 1}`}
+                      className="w-32 h-40 md:w-40 md:h-52 lg:w-48 lg:h-60 object-cover rounded-lg shadow-lg"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Second Row - Sliding Left to Right */}
+          <div className="mb-8 overflow-hidden">
+            <div className="animate-scroll-left whitespace-nowrap">
+              <div className="inline-flex space-x-4">
+                {[...posterGallery2, ...posterGallery2].map((image, index) => (
+                  <div key={index} className="relative flex-shrink-0">
+                    <img
+                      src={image}
+                      alt={`Poster ${index + 1}`}
+                      className="w-32 h-40 md:w-40 md:h-52 lg:w-48 lg:h-60 object-cover rounded-lg shadow-lg"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="text-center">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="gradient-primary">
                 <Link to="/products" className="flex items-center">
@@ -33,6 +116,34 @@ export default function Index() {
                 <Link to="/custom-poster">Create Custom Art</Link>
               </Button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Product Categories Section */}
+      <section className="py-16 bg-black text-white">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <Link to="/products?category=single-posters">
+              <div className="bg-white text-black p-6 rounded-lg text-center hover:bg-gray-100 transition-colors">
+                <h3 className="font-bold text-lg">SINGLE POSTERS</h3>
+              </div>
+            </Link>
+            <Link to="/products?category=split-posters">
+              <div className="bg-white text-black p-6 rounded-lg text-center hover:bg-gray-100 transition-colors">
+                <h3 className="font-bold text-lg">SPLIT POSTERS</h3>
+              </div>
+            </Link>
+            <Link to="/custom-poster">
+              <div className="bg-white text-black p-6 rounded-lg text-center hover:bg-gray-100 transition-colors">
+                <h3 className="font-bold text-lg">CUSTOM POLAROIDS</h3>
+              </div>
+            </Link>
+            <Link to="/products?category=stickers">
+              <div className="bg-white text-black p-6 rounded-lg text-center hover:bg-gray-100 transition-colors">
+                <h3 className="font-bold text-lg">STICKERS</h3>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
