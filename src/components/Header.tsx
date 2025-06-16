@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import logo from '@/images/logo3.1.png';
+import logo from '@/images/logo3.png';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
