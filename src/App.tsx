@@ -9,6 +9,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -21,6 +22,11 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import OrderSuccess from "./pages/OrderSuccess";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminProducts from "./pages/admin/Products";
+import AdminOrders from "./pages/admin/Orders";
+import AdminUsers from "./pages/admin/Users";
+import AdminSettings from "./pages/admin/Settings";
 
 const queryClient = new QueryClient();
 
@@ -34,24 +40,40 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-1">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/products" element={<Products />} />
-                    <Route path="/product/:id" element={<ProductDetail />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/custom-poster" element={<CustomPoster />} />
-                    <Route path="/neon-led" element={<NeonLed />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/order-success" element={<OrderSuccess />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
-                <Footer />
+                <Routes>
+                  {/* Admin Routes */}
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
+
+                  {/* Public Routes */}
+                  <Route path="/*" element={
+                    <>
+                      <Header />
+                      <main className="flex-1">
+                        <Routes>
+                          <Route path="/" element={<Index />} />
+                          <Route path="/products" element={<Products />} />
+                          <Route path="/product/:id" element={<ProductDetail />} />
+                          <Route path="/cart" element={<Cart />} />
+                          <Route path="/checkout" element={<Checkout />} />
+                          <Route path="/custom-poster" element={<CustomPoster />} />
+                          <Route path="/neon-led" element={<NeonLed />} />
+                          <Route path="/about" element={<About />} />
+                          <Route path="/contact" element={<Contact />} />
+                          <Route path="/login" element={<Login />} />
+                          <Route path="/order-success" element={<OrderSuccess />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </main>
+                      <Footer />
+                    </>
+                  } />
+                </Routes>
               </div>
             </BrowserRouter>
           </CartProvider>
