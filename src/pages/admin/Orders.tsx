@@ -12,47 +12,64 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useOrders, useUpdateOrderStatus } from '@/hooks/useOrders';
 
 export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: orders = [], isLoading } = useOrders();
-  const updateOrderStatus = useUpdateOrderStatus();
+
+  // Mock data - replace with actual API calls
+  const orders = [
+    {
+      id: 'ORD-001',
+      customer: 'John Doe',
+      email: 'john@example.com',
+      products: 2,
+      total: 598,
+      status: 'Processing',
+      paymentStatus: 'Paid',
+      date: '2024-01-15',
+    },
+    {
+      id: 'ORD-002',
+      customer: 'Jane Smith',
+      email: 'jane@example.com',
+      products: 1,
+      total: 299,
+      status: 'Shipped',
+      paymentStatus: 'Paid',
+      date: '2024-01-14',
+    },
+    {
+      id: 'ORD-003',
+      customer: 'Mike Johnson',
+      email: 'mike@example.com',
+      products: 3,
+      total: 897,
+      status: 'Delivered',
+      paymentStatus: 'Paid',
+      date: '2024-01-13',
+    },
+  ];
 
   const filteredOrders = orders.filter(order =>
     order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (order.user_profiles?.full_name && order.user_profiles.full_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (order.user_profiles?.email && order.user_profiles.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending':
+      case 'Processing':
         return 'bg-yellow-100 text-yellow-800';
-      case 'processing':
+      case 'Shipped':
         return 'bg-blue-100 text-blue-800';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800';
-      case 'delivered':
+      case 'Delivered':
         return 'bg-green-100 text-green-800';
-      case 'cancelled':
+      case 'Cancelled':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
-
-  const handleStatusUpdate = async (orderId: string, newStatus: any) => {
-    await updateOrderStatus.mutateAsync({ id: orderId, status: newStatus });
-  };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center">Loading orders...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -99,13 +116,13 @@ export default function AdminOrders() {
               <div className="flex justify-between">
                 <span className="text-sm">Processing</span>
                 <span className="font-bold text-yellow-600">
-                  {orders.filter(o => o.status === 'processing').length}
+                  {orders.filter(o => o.status === 'Processing').length}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm">Shipped</span>
                 <span className="font-bold text-blue-600">
-                  {orders.filter(o => o.status === 'shipped').length}
+                  {orders.filter(o => o.status === 'Shipped').length}
                 </span>
               </div>
             </div>
@@ -124,7 +141,7 @@ export default function AdminOrders() {
               <TableRow>
                 <TableHead>Order ID</TableHead>
                 <TableHead>Customer</TableHead>
-                <TableHead>Items</TableHead>
+                <TableHead>Products</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Payment</TableHead>
@@ -135,53 +152,35 @@ export default function AdminOrders() {
             <TableBody>
               {filteredOrders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">
-                    {order.id.slice(0, 8)}...
-                  </TableCell>
+                  <TableCell className="font-medium">{order.id}</TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">
-                        {order.user_profiles?.full_name || 'Unknown User'}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {order.user_profiles?.email}
-                      </div>
+                      <div className="font-medium">{order.customer}</div>
+                      <div className="text-sm text-muted-foreground">{order.email}</div>
                     </div>
                   </TableCell>
-                  <TableCell>{order.order_items?.length || 0} items</TableCell>
-                  <TableCell className="font-medium">₹{order.total_amount}</TableCell>
+                  <TableCell>{order.products} items</TableCell>
+                  <TableCell className="font-medium">₹{order.total}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}>
                       {order.status}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      order.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {order.payment_status}
+                    <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                      {order.paymentStatus}
                     </span>
                   </TableCell>
-                  <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>{order.date}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button variant="ghost" size="sm">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleStatusUpdate(order.id, 'processing')}
-                        disabled={updateOrderStatus.isPending}
-                      >
+                      <Button variant="ghost" size="sm">
                         <Package className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleStatusUpdate(order.id, 'shipped')}
-                        disabled={updateOrderStatus.isPending}
-                      >
+                      <Button variant="ghost" size="sm">
                         <Truck className="h-4 w-4" />
                       </Button>
                     </div>

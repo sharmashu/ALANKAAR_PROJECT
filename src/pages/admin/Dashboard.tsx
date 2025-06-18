@@ -1,25 +1,23 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, ShoppingCart, Users, DollarSign, TrendingUp, AlertTriangle } from 'lucide-react';
-import { useAdminProducts } from '@/hooks/useProducts';
-import { useOrders } from '@/hooks/useOrders';
-import { useUsers } from '@/hooks/useUsers';
 
 export default function AdminDashboard() {
-  const { data: products = [] } = useAdminProducts();
-  const { data: orders = [] } = useOrders();
-  const { data: users = [] } = useUsers();
-
+  // Mock data - replace with actual API calls
   const stats = {
-    totalProducts: products.length,
-    totalOrders: orders.length,
-    totalUsers: users.length,
-    totalRevenue: orders.reduce((sum, order) => sum + order.total_amount, 0),
-    lowStockItems: products.filter(p => p.stock_quantity < 10).length,
-    pendingOrders: orders.filter(o => o.status === 'pending').length,
+    totalProducts: 156,
+    totalOrders: 89,
+    totalUsers: 234,
+    totalRevenue: 45670,
+    monthlyGrowth: 12.5,
+    lowStockItems: 8
   };
 
-  const recentOrders = orders.slice(0, 5);
+  const recentOrders = [
+    { id: 'ORD-001', customer: 'John Doe', amount: 299, status: 'Processing' },
+    { id: 'ORD-002', customer: 'Jane Smith', amount: 499, status: 'Shipped' },
+    { id: 'ORD-003', customer: 'Mike Johnson', amount: 199, status: 'Delivered' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -46,7 +44,7 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalOrders}</div>
             <p className="text-xs text-muted-foreground">
-              All time orders
+              Orders this month
             </p>
           </CardContent>
         </Card>
@@ -73,7 +71,7 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               <TrendingUp className="h-3 w-3 inline mr-1" />
-              All time revenue
+              +{stats.monthlyGrowth}% from last month
             </p>
           </CardContent>
         </Card>
@@ -91,18 +89,15 @@ export default function AdminDashboard() {
               {recentOrders.map((order) => (
                 <div key={order.id} className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">{order.id.slice(0, 8)}...</p>
-                    <p className="text-sm text-muted-foreground">
-                      {order.user_profiles?.full_name || order.user_profiles?.email || 'Unknown User'}
-                    </p>
+                    <p className="font-medium">{order.id}</p>
+                    <p className="text-sm text-muted-foreground">{order.customer}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">₹{order.total_amount}</p>
+                    <p className="font-medium">₹{order.amount}</p>
                     <span className={`text-xs px-2 py-1 rounded-full ${
-                      order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                      order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                      order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
+                      order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                      order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' :
+                      'bg-yellow-100 text-yellow-800'
                     }`}>
                       {order.status}
                     </span>
@@ -120,37 +115,20 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stats.lowStockItems > 0 && (
-                <div className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
-                  <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                  <div>
-                    <p className="font-medium text-yellow-800">Low Stock Alert</p>
-                    <p className="text-sm text-yellow-700">
-                      {stats.lowStockItems} products are running low on stock
-                    </p>
-                  </div>
+              <div className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <div>
+                  <p className="font-medium text-yellow-800">Low Stock Alert</p>
+                  <p className="text-sm text-yellow-700">{stats.lowStockItems} products are running low on stock</p>
                 </div>
-              )}
-              {stats.pendingOrders > 0 && (
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-                  <ShoppingCart className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium text-blue-800">Pending Orders</p>
-                    <p className="text-sm text-blue-700">
-                      {stats.pendingOrders} orders require processing
-                    </p>
-                  </div>
+              </div>
+              <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                <ShoppingCart className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="font-medium text-blue-800">New Orders</p>
+                  <p className="text-sm text-blue-700">5 new orders require processing</p>
                 </div>
-              )}
-              {stats.pendingOrders === 0 && stats.lowStockItems === 0 && (
-                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="font-medium text-green-800">All Good!</p>
-                    <p className="text-sm text-green-700">No urgent issues to address</p>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           </CardContent>
         </Card>

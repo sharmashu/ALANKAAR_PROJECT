@@ -12,31 +12,45 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useAdminProducts, useDeleteProduct } from '@/hooks/useProducts';
 
 export default function AdminProducts() {
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: products = [], isLoading } = useAdminProducts();
-  const deleteProduct = useDeleteProduct();
+
+  // Mock data - replace with actual API calls
+  const products = [
+    {
+      id: '1',
+      name: 'Motivational Quote Poster',
+      category: 'Posters',
+      price: 299,
+      stock: 45,
+      status: 'Active',
+      image: '/placeholder.svg'
+    },
+    {
+      id: '2',
+      name: 'Custom Neon Sign',
+      category: 'Neon Signs',
+      price: 1999,
+      stock: 12,
+      status: 'Active',
+      image: '/placeholder.svg'
+    },
+    {
+      id: '3',
+      name: 'Wooden Frame Set',
+      category: 'Frames',
+      price: 599,
+      stock: 3,
+      status: 'Low Stock',
+      image: '/placeholder.svg'
+    },
+  ];
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.category?.name && product.category.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      await deleteProduct.mutateAsync(id);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center">Loading products...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -94,23 +108,23 @@ export default function AdminProducts() {
                   <TableCell>
                     <div className="flex items-center space-x-3">
                       <img
-                        src={product.image_url || '/placeholder.svg'}
+                        src={product.image}
                         alt={product.name}
                         className="h-10 w-10 rounded-md object-cover"
                       />
                       <span className="font-medium">{product.name}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{product.category?.name || 'Uncategorized'}</TableCell>
+                  <TableCell>{product.category}</TableCell>
                   <TableCell>₹{product.price}</TableCell>
                   <TableCell>
-                    <span className={`${product.stock_quantity < 10 ? 'text-red-600' : 'text-green-600'}`}>
-                      {product.stock_quantity}
+                    <span className={`${product.stock < 10 ? 'text-red-600' : 'text-green-600'}`}>
+                      {product.stock}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${
-                      product.status === 'active' ? 'bg-green-100 text-green-800' :
+                      product.status === 'Active' ? 'bg-green-100 text-green-800' :
                       'bg-red-100 text-red-800'
                     }`}>
                       {product.status}
@@ -124,13 +138,7 @@ export default function AdminProducts() {
                       <Button variant="ghost" size="sm">
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-red-600"
-                        onClick={() => handleDelete(product.id)}
-                        disabled={deleteProduct.isPending}
-                      >
+                      <Button variant="ghost" size="sm" className="text-red-600">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
