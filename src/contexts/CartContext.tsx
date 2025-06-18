@@ -34,17 +34,25 @@ const initialState: CartState = {
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existingItem = state.items.find(item => item.id === action.payload.id);
+      const existingItem = state.items.find(item => 
+        item.id === action.payload.id && 
+        (item.size || '') === (action.payload.size || '')
+      );
       let newItems;
 
       if (existingItem) {
         newItems = state.items.map(item =>
-          item.id === action.payload.id
+          item.id === action.payload.id && (item.size || '') === (action.payload.size || '')
             ? { ...item, quantity: item.quantity + (action.payload.quantity || 1) }
             : item
         );
       } else {
-        newItems = [...state.items, { ...action.payload, quantity: action.payload.quantity || 1 }];
+        const itemKey = `${action.payload.id}-${action.payload.size || 'default'}`;
+        newItems = [...state.items, { 
+          ...action.payload, 
+          id: itemKey,
+          quantity: action.payload.quantity || 1 
+        }];
       }
 
       const total = newItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -98,7 +106,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
+    const savedCart = localStorage.getItem('alankaar_cart');
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart);
@@ -110,7 +118,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(state));
+    localStorage.setItem('alankaar_cart', JSON.stringify(state));
   }, [state]);
 
   const addItem = (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
@@ -135,10 +143,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
-    toast({
-      title: "Cart cleared",
-      description: "All items have been removed from your cart.",
-    });
   };
 
   return (

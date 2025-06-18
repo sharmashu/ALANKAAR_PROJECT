@@ -8,19 +8,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCreateOrder } from '@/hooks/useOrders';
 import { toast } from '@/hooks/use-toast';
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, total, clearCart } = useCart();
-  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const createOrder = useCreateOrder();
   const [paymentMethod, setPaymentMethod] = useState('card');
 
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
+    firstName: user?.name?.split(' ')[0] || '',
+    lastName: user?.name?.split(' ').slice(1).join(' ') || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
     address: '',
     city: '',
     state: '',
@@ -36,27 +39,50 @@ export default function Checkout() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      clearCart();
+    if (!user) {
       toast({
-        title: "Order placed successfully!",
-        description: "You will receive a confirmation email shortly.",
-      });
-      
-      navigate('/order-success');
-    } catch (error) {
-      toast({
-        title: "Order failed",
-        description: "Please try again.",
+        title: "Authentication required",
+        description: "Please log in to place an order.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+      navigate('/login');
+      return;
+    }
+
+    const shippingAddress = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      pincode: formData.pincode,
+    };
+
+    const orderItems = items.map(item => ({
+      product_id: item.id.split('-')[0], // Remove size suffix if any
+      quantity: item.quantity,
+      price: item.price,
+      custom_options: {
+        size: item.size,
+        ...item.customOptions
+      }
+    }));
+
+    try {
+      await createOrder.mutateAsync({
+        total_amount: total + 99, // Including shipping
+        shipping_address: shippingAddress,
+        payment_method: paymentMethod,
+        items: orderItems,
+      });
+
+      clearCart();
+      navigate('/order-success');
+    } catch (error) {
+      console.error('Order creation failed:', error);
     }
   };
 
@@ -154,7 +180,7 @@ export default function Checkout() {
                   </div>
                   <div>
                     <Label htmlFor="state">State</Label>
-                    <Select>
+                    <Select onValueChange={(value) => setFormData(prev => ({ ...prev, state: value }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select State" />
                       </SelectTrigger>
@@ -162,6 +188,10 @@ export default function Checkout() {
                         <SelectItem value="delhi">Delhi</SelectItem>
                         <SelectItem value="mumbai">Mumbai</SelectItem>
                         <SelectItem value="bangalore">Bangalore</SelectItem>
+                        <SelectItem value="chennai">Chennai</SelectItem>
+                        <SelectItem value="kolkata">Kolkata</SelectItem>
+                        <SelectItem value="hyderabad">Hyderabad</SelectItem>
+                        <SelectItem value="pune">Pune</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -231,7 +261,7 @@ export default function Checkout() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {items.map((item) => (
-                  <div key={`${item.id}-${item.size}`} className="flex justify-between">
+                  <div key={item.id} className="flex justify-between">
                     <div>
                       <p className="font-medium">{item.name}</p>
                       <p className="text-sm text-muted-foreground">
@@ -257,8 +287,8 @@ export default function Checkout() {
                   </div>
                 </div>
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Processing..." : "Place Order"}
+                <Button type="submit" className="w-full" disabled={createOrder.isPending}>
+                  {createOrder.isPending ? "Processing..." : "Place Order"}
                 </Button>
               </CardContent>
             </Card>

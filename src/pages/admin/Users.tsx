@@ -12,56 +12,35 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useUsers, useUpdateUserRole } from '@/hooks/useUsers';
 
 export default function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Mock data - replace with actual API calls
-  const users = [
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+91 9876543210',
-      role: 'Customer',
-      orders: 5,
-      totalSpent: 2500,
-      joinDate: '2024-01-10',
-      status: 'Active'
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      phone: '+91 9876543211',
-      role: 'Customer',
-      orders: 3,
-      totalSpent: 1800,
-      joinDate: '2024-01-08',
-      status: 'Active'
-    },
-    {
-      id: '3',
-      name: 'Admin User',
-      email: 'admin@alankaar.com',
-      phone: '+91 9876543212',
-      role: 'Admin',
-      orders: 0,
-      totalSpent: 0,
-      joinDate: '2024-01-01',
-      status: 'Active'
-    },
-  ];
+  const { data: users = [], isLoading } = useUsers();
+  const updateUserRole = useUpdateUserRole();
 
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.full_name && user.full_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.phone.includes(searchTerm)
+    (user.phone && user.phone.includes(searchTerm))
   );
 
   const getRoleColor = (role: string) => {
-    return role === 'Admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800';
+    return role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800';
   };
+
+  const handleRoleToggle = async (userId: string, currentRole: 'customer' | 'admin') => {
+    const newRole = currentRole === 'admin' ? 'customer' : 'admin';
+    await updateUserRole.mutateAsync({ id: userId, role: newRole });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">Loading users...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -108,13 +87,13 @@ export default function AdminUsers() {
               <div className="flex justify-between">
                 <span className="text-sm">Customers</span>
                 <span className="font-bold text-blue-600">
-                  {users.filter(u => u.role === 'Customer').length}
+                  {users.filter(u => u.role === 'customer').length}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm">Admins</span>
                 <span className="font-bold text-purple-600">
-                  {users.filter(u => u.role === 'Admin').length}
+                  {users.filter(u => u.role === 'admin').length}
                 </span>
               </div>
             </div>
@@ -134,10 +113,7 @@ export default function AdminUsers() {
                 <TableHead>User</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Orders</TableHead>
-                <TableHead>Total Spent</TableHead>
                 <TableHead>Join Date</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -146,26 +122,27 @@ export default function AdminUsers() {
                 <TableRow key={user.id}>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{user.name}</div>
+                      <div className="font-medium">
+                        {user.full_name || user.email.split('@')[0]}
+                      </div>
                       <div className="text-sm text-muted-foreground">{user.email}</div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="text-sm">{user.phone}</div>
+                    <div className="text-sm">{user.phone || 'Not provided'}</div>
                   </TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${getRoleColor(user.role)}`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`px-2 py-1 rounded-full text-xs ${getRoleColor(user.role)}`}
+                      onClick={() => handleRoleToggle(user.id, user.role)}
+                      disabled={updateUserRole.isPending}
+                    >
                       {user.role}
-                    </span>
+                    </Button>
                   </TableCell>
-                  <TableCell>{user.orders}</TableCell>
-                  <TableCell className="font-medium">₹{user.totalSpent.toLocaleString()}</TableCell>
-                  <TableCell>{user.joinDate}</TableCell>
-                  <TableCell>
-                    <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                      {user.status}
-                    </span>
-                  </TableCell>
+                  <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button variant="ghost" size="sm">

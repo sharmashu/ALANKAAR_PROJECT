@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Filter, Search } from 'lucide-react';
@@ -6,35 +7,42 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ProductCard } from '@/components/ProductCard';
-import { allProducts, categories } from '@/data/mockData';
+import { useProducts } from '@/hooks/useProducts';
+import { useCategories } from '@/hooks/useCategories';
 
 export default function Products() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
   const [sortBy, setSortBy] = useState('popularity');
 
   const categoryFilter = searchParams.get('category');
+  
+  const { data: allProducts = [], isLoading: productsLoading } = useProducts();
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
 
   const filteredProducts = useMemo(() => {
     let filtered = allProducts;
 
     // Apply category filter from URL
     if (categoryFilter) {
-      filtered = filtered.filter(product => product.category === categoryFilter);
+      filtered = filtered.filter(product => product.category?.slug === categoryFilter);
     }
 
     // Apply selected categories filter
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter(product => selectedCategories.includes(product.category));
+      filtered = filtered.filter(product => 
+        product.category && selectedCategories.includes(product.category.slug)
+      );
     }
 
     // Apply search query
     if (searchQuery) {
       filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
@@ -54,21 +62,34 @@ export default function Products() {
       case 'rating':
         filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
+      case 'name':
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        break;
       default:
         // popularity - keep original order
         break;
     }
 
     return filtered;
-  }, [categoryFilter, selectedCategories, searchQuery, priceRange, sortBy]);
+  }, [allProducts, categoryFilter, selectedCategories, searchQuery, priceRange, sortBy]);
 
-  const handleCategoryChange = (categoryId: string, checked: boolean) => {
+  const handleCategoryChange = (categorySlug: string, checked: boolean) => {
     if (checked) {
-      setSelectedCategories(prev => [...prev, categoryId]);
+      setSelectedCategories(prev => [...prev, categorySlug]);
     } else {
-      setSelectedCategories(prev => prev.filter(id => id !== categoryId));
+      setSelectedCategories(prev => prev.filter(slug => slug !== categorySlug));
     }
   };
+
+  if (productsLoading || categoriesLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="text-lg">Loading products...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -98,13 +119,13 @@ export default function Products() {
               {categories.map((category) => (
                 <div key={category.id} className="flex items-center space-x-2">
                   <Checkbox
-                    id={category.id}
-                    checked={selectedCategories.includes(category.id)}
+                    id={category.slug}
+                    checked={selectedCategories.includes(category.slug)}
                     onCheckedChange={(checked) => 
-                      handleCategoryChange(category.id, checked as boolean)
+                      handleCategoryChange(category.slug, checked as boolean)
                     }
                   />
-                  <label htmlFor={category.id} className="text-sm">
+                  <label htmlFor={category.slug} className="text-sm">
                     {category.name}
                   </label>
                 </div>
@@ -127,7 +148,7 @@ export default function Products() {
                   type="number"
                   placeholder="Max"
                   value={priceRange[1]}
-                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 1000])}
+                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 5000])}
                   className="w-20"
                 />
               </div>
@@ -142,7 +163,7 @@ export default function Products() {
             <div>
               <h1 className="text-2xl font-bold">
                 {categoryFilter 
-                  ? categories.find(c => c.id === categoryFilter)?.name || 'Products'
+                  ? categories.find(c => c.slug === categoryFilter)?.name || 'Products'
                   : 'All Products'
                 }
               </h1>
@@ -171,6 +192,7 @@ export default function Products() {
                   <SelectItem value="price-low">Price: Low to High</SelectItem>
                   <SelectItem value="price-high">Price: High to Low</SelectItem>
                   <SelectItem value="rating">Rating</SelectItem>
+                  <SelectItem value="name">Name</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -179,7 +201,14 @@ export default function Products() {
           {/* Products Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard 
+                key={product.id} 
+                product={{
+                  ...product,
+                  image: product.image_url || '/placeholder.svg',
+                  category: product.category?.name || 'Uncategorized'
+                }} 
+              />
             ))}
           </div>
 
@@ -192,7 +221,7 @@ export default function Products() {
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedCategories([]);
-                  setPriceRange([0, 1000]);
+                  setPriceRange([0, 5000]);
                 }}
               >
                 Clear Filters
