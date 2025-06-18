@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Eye, Edit, Trash2, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,43 +14,27 @@ import {
 
 export default function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - replace with actual API calls
-  const users = [
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+91 9876543210',
-      role: 'Customer',
-      orders: 5,
-      totalSpent: 2500,
-      joinDate: '2024-01-10',
-      status: 'Active'
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      phone: '+91 9876543211',
-      role: 'Customer',
-      orders: 3,
-      totalSpent: 1800,
-      joinDate: '2024-01-08',
-      status: 'Active'
-    },
-    {
-      id: '3',
-      name: 'Admin User',
-      email: 'admin@alankaar.com',
-      phone: '+91 9876543212',
-      role: 'Admin',
-      orders: 0,
-      totalSpent: 0,
-      joinDate: '2024-01-01',
-      status: 'Active'
-    },
-  ];
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/users');
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

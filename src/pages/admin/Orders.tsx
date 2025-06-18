@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Eye, Package, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,40 +14,27 @@ import {
 
 export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - replace with actual API calls
-  const orders = [
-    {
-      id: 'ORD-001',
-      customer: 'John Doe',
-      email: 'john@example.com',
-      products: 2,
-      total: 598,
-      status: 'Processing',
-      paymentStatus: 'Paid',
-      date: '2024-01-15',
-    },
-    {
-      id: 'ORD-002',
-      customer: 'Jane Smith',
-      email: 'jane@example.com',
-      products: 1,
-      total: 299,
-      status: 'Shipped',
-      paymentStatus: 'Paid',
-      date: '2024-01-14',
-    },
-    {
-      id: 'ORD-003',
-      customer: 'Mike Johnson',
-      email: 'mike@example.com',
-      products: 3,
-      total: 897,
-      status: 'Delivered',
-      paymentStatus: 'Paid',
-      date: '2024-01-13',
-    },
-  ];
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/orders');
+        const data = await response.json();
+        setOrders(data);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   const filteredOrders = orders.filter(order =>
     order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||

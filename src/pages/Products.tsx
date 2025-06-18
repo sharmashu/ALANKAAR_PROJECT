@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Filter, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,8 @@ export default function Products() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [sortBy, setSortBy] = useState('popularity');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const categoryFilter = searchParams.get('category');
 
@@ -61,6 +63,25 @@ export default function Products() {
 
     return filtered;
   }, [categoryFilter, selectedCategories, searchQuery, priceRange, sortBy]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/products');
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   const handleCategoryChange = (categoryId: string, checked: boolean) => {
     if (checked) {

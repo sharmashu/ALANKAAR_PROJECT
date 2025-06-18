@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
@@ -34,40 +33,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Mock authentication - replace with real API call
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        id: '1',
-        email,
-        name: email.split('@')[0],
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+      setUser(data.user);
+      localStorage.setItem('user', JSON.stringify(data.user));
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
   const register = async (email: string, password: string, name: string) => {
-    // Mock registration - replace with real API call
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        id: '1',
-        email,
-        name,
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+      setUser(data.user);
+      localStorage.setItem('user', JSON.stringify(data.user));
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }

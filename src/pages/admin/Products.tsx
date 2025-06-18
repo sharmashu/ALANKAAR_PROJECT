@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,42 +14,32 @@ import {
 
 export default function AdminProducts() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - replace with actual API calls
-  const products = [
-    {
-      id: '1',
-      name: 'Motivational Quote Poster',
-      category: 'Posters',
-      price: 299,
-      stock: 45,
-      status: 'Active',
-      image: '/placeholder.svg'
-    },
-    {
-      id: '2',
-      name: 'Custom Neon Sign',
-      category: 'Neon Signs',
-      price: 1999,
-      stock: 12,
-      status: 'Active',
-      image: '/placeholder.svg'
-    },
-    {
-      id: '3',
-      name: 'Wooden Frame Set',
-      category: 'Frames',
-      price: 599,
-      stock: 3,
-      status: 'Low Stock',
-      image: '/placeholder.svg'
-    },
-  ];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/products');
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
