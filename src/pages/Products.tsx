@@ -91,7 +91,19 @@ export default function Products() {
   return (
     <div className="container mx-auto px-4 py-4 md:py-8">
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
-        {/* Filters Sidebar - Mobile Responsive */}
+        {/* Mobile Filter Toggle */}
+        <div className="lg:hidden mb-4">
+          <Button
+            variant="outline"
+            onClick={() => setShowFilters(!showFilters)}
+            className="w-full"
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            {showFilters ? 'Hide Filters' : 'Show Filters'}
+          </Button>
+        </div>
+
+        {/* Filters Sidebar */}
         <div className={`lg:w-1/4 space-y-4 lg:space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
           <div className="bg-card p-4 lg:p-6 rounded-lg border">
             <h3 className="font-semibold mb-4">Filters</h3>
@@ -155,7 +167,7 @@ export default function Products() {
 
         {/* Products */}
         <div className="lg:w-3/4">
-          {/* Header - Mobile Responsive */}
+          {/* Header */}
           <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0 mb-6">
             <div>
               <h1 className="text-xl md:text-2xl font-bold">
@@ -170,16 +182,6 @@ export default function Products() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="lg:hidden w-full sm:w-auto"
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                {showFilters ? 'Hide Filters' : 'Show Filters'}
-              </Button>
-
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-full sm:w-40">
                   <SelectValue />
@@ -194,8 +196,8 @@ export default function Products() {
             </div>
           </div>
 
-          {/* Products Grid - Mobile Responsive */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+          {/* Products Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

@@ -1,41 +1,10 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = "https://xevkafxqayoxkakzhjev.supabase.co"
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhldmthZnhxYXlveGtha3poamV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAzMjIyOTcsImV4cCI6MjA2NTg5ODI5N30.GO3lYAUKb2LLf1N-Yo2NpVD7qLaWj9bRgCbKBkAmGQE"
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase configuration missing. Please set up your Supabase integration.')
-  console.error('Missing:', {
-    url: !supabaseUrl ? 'VITE_SUPABASE_URL' : 'OK',
-    key: !supabaseAnonKey ? 'VITE_SUPABASE_ANON_KEY' : 'OK'
-  })
-}
-
-// Create a mock client if credentials are missing to prevent app crashes
-export const supabase = supabaseUrl && supabaseAnonKey 
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : {
-      auth: {
-        getSession: () => Promise.resolve({ data: { session: null }, error: null }),
-        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-        signInWithPassword: () => Promise.reject(new Error('Supabase not configured')),
-        signUp: () => Promise.reject(new Error('Supabase not configured')),
-        signOut: () => Promise.reject(new Error('Supabase not configured')),
-      },
-      from: () => ({
-        select: () => ({ order: () => Promise.resolve({ data: [], error: null }) }),
-        insert: () => Promise.reject(new Error('Supabase not configured')),
-        update: () => Promise.reject(new Error('Supabase not configured')),
-        delete: () => Promise.reject(new Error('Supabase not configured')),
-      }),
-      storage: {
-        from: () => ({
-          upload: () => Promise.reject(new Error('Supabase not configured')),
-          getPublicUrl: () => ({ data: { publicUrl: '' } }),
-        }),
-      },
-    }
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Database types
 export interface Product {

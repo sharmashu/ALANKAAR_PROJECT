@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Eye, Upload } from 'lucide-react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -111,18 +111,18 @@ export default function AdminProducts() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6 p-4 md:p-0">
-      {/* Header - Mobile Responsive */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+    <div className="space-y-4 md:space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
         <h1 className="text-2xl md:text-3xl font-bold">Products</h1>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full md:w-auto">
+            <Button className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Add Product
             </Button>
           </DialogTrigger>
-          <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
             </DialogHeader>
@@ -143,12 +143,13 @@ export default function AdminProducts() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="price">Price</Label>
+                  <Label htmlFor="price">Price (₹)</Label>
                   <Input
                     id="price"
                     type="number"
@@ -206,13 +207,14 @@ export default function AdminProducts() {
                 />
               </div>
               
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                 <Button type="submit" className="flex-1">
                   {editingProduct ? 'Update' : 'Add'} Product
                 </Button>
                 <Button 
                   type="button" 
                   variant="outline" 
+                  className="flex-1"
                   onClick={() => {
                     setIsAddDialogOpen(false);
                     setEditingProduct(null);
@@ -234,7 +236,7 @@ export default function AdminProducts() {
         </Dialog>
       </div>
 
-      {/* Search - Mobile Responsive */}
+      {/* Search */}
       <Card>
         <CardHeader>
           <CardTitle>Search & Filter</CardTitle>
@@ -252,12 +254,12 @@ export default function AdminProducts() {
         </CardContent>
       </Card>
 
-      {/* Products Table - Mobile Responsive */}
+      {/* Products Table */}
       <Card>
         <CardHeader>
           <CardTitle>All Products ({filteredProducts.length})</CardTitle>
         </CardHeader>
-        <CardContent className="p-0 md:p-6">
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -277,7 +279,7 @@ export default function AdminProducts() {
                         <img
                           src={product.image || '/placeholder.svg'}
                           alt={product.title}
-                          className="h-10 w-10 rounded-md object-cover"
+                          className="h-10 w-10 rounded-md object-cover flex-shrink-0"
                         />
                         <div className="min-w-0">
                           <div className="font-medium truncate">{product.title}</div>
