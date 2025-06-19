@@ -4,7 +4,38 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Supabase configuration missing. Please set up your Supabase integration.')
+  console.error('Missing:', {
+    url: !supabaseUrl ? 'VITE_SUPABASE_URL' : 'OK',
+    key: !supabaseAnonKey ? 'VITE_SUPABASE_ANON_KEY' : 'OK'
+  })
+}
+
+// Create a mock client if credentials are missing to prevent app crashes
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : {
+      auth: {
+        getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+        signInWithPassword: () => Promise.reject(new Error('Supabase not configured')),
+        signUp: () => Promise.reject(new Error('Supabase not configured')),
+        signOut: () => Promise.reject(new Error('Supabase not configured')),
+      },
+      from: () => ({
+        select: () => ({ order: () => Promise.resolve({ data: [], error: null }) }),
+        insert: () => Promise.reject(new Error('Supabase not configured')),
+        update: () => Promise.reject(new Error('Supabase not configured')),
+        delete: () => Promise.reject(new Error('Supabase not configured')),
+      }),
+      storage: {
+        from: () => ({
+          upload: () => Promise.reject(new Error('Supabase not configured')),
+          getPublicUrl: () => ({ data: { publicUrl: '' } }),
+        }),
+      },
+    }
 
 // Database types
 export interface Product {
