@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -65,7 +64,7 @@ export default function Index() {
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-black dark:text-white mb-4">
               VIBE IT. PRINT IT.{' '}
               <span className="gradient-primary bg-clip-text text-transparent">
-                POSTERIZED.
+                ALANKAAR.
               </span>
             </h1>
           </div>
