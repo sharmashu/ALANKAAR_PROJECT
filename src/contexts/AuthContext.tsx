@@ -37,7 +37,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
@@ -56,21 +59,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (email: string, password: string, name: string) => {
     setIsLoading(true);
+    console.log('Starting registration process...', { email, name });
     try {
+      console.log('Sending registration request to server...');
       const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ email, password, name }),
       });
+      console.log('Received response from server:', { status: response.status });
       const data = await response.json();
+      console.log('Response data:', data);
+      
       if (!response.ok) {
+        console.error('Registration failed:', data.error);
         throw new Error(data.error || 'Registration failed');
       }
+      
+      console.log('Registration successful, setting user data...');
       setUser(data.user);
       localStorage.setItem('user', JSON.stringify(data.user));
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
+      console.log('User data saved successfully');
+    } catch (error: any) {
+      console.error('Registration error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      throw new Error(error.message || 'Registration failed');
     } finally {
       setIsLoading(false);
     }

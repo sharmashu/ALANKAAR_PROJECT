@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -52,10 +51,10 @@ export default function Login() {
         description: "Your account has been created successfully.",
       });
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Registration failed",
-        description: "Please try again with different details.",
+        description: error.message || "Please try again with different details.",
         variant: "destructive",
       });
     }

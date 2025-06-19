@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import Product from '../models/Product.js';
+import auth from '../middleware/auth.js';
+
 const router = express.Router();
-const Product = require('../models/Product');
-const auth = require('../middleware/auth');
 
 // Get all products
 router.get('/', async (req, res) => {
@@ -63,4 +64,4 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-module.exports = router; 
+export default router; 
