@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { 
@@ -17,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -75,7 +74,7 @@ export function AdminLayout() {
           <Button
             variant="ghost"
             className="w-full justify-start"
-            onClick={logout}
+            onClick={signOut}
           >
             <LogOut className="h-4 w-4" />
             {sidebarOpen && <span className="ml-3">Logout</span>}

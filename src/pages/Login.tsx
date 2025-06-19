@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,14 +11,14 @@ import { toast } from '@/hooks/use-toast';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, register, isLoading } = useAuth();
+  const { signIn, signUp, isLoading } = useAuth();
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(loginData.email, loginData.password);
+      await signIn(loginData.email, loginData.password);
       toast({
         title: "Welcome back!",
         description: "You have been successfully logged in.",
@@ -45,7 +46,7 @@ export default function Login() {
     }
 
     try {
-      await register(registerData.email, registerData.password, registerData.name);
+      await signUp(registerData.email, registerData.password, registerData.name);
       toast({
         title: "Account created!",
         description: "Your account has been created successfully.",
