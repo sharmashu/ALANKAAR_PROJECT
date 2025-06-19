@@ -1,5 +1,4 @@
-
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Filter, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,23 +6,22 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ProductCard } from '@/components/ProductCard';
-import { useProducts } from '@/hooks/useProducts';
-import { useCategories } from '@/hooks/useCategories';
+import { allProducts, categories } from '@/data/mockData';
 
 export default function Products() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
-  const [sortBy, setSortBy] = useState('created_at');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [sortBy, setSortBy] = useState('popularity');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const { products, loading } = useProducts();
-  const { categories } = useCategories();
   const categoryFilter = searchParams.get('category');
 
   const filteredProducts = useMemo(() => {
-    let filtered = products;
+    let filtered = allProducts;
 
     // Apply category filter from URL
     if (categoryFilter) {
@@ -38,8 +36,7 @@ export default function Products() {
     // Apply search query
     if (searchQuery) {
       filtered = filtered.filter(product =>
-        product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -56,16 +53,35 @@ export default function Products() {
       case 'price-high':
         filtered.sort((a, b) => b.price - a.price);
         break;
-      case 'title':
-        filtered.sort((a, b) => a.title.localeCompare(b.title));
+      case 'rating':
+        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       default:
-        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        // popularity - keep original order
         break;
     }
 
     return filtered;
-  }, [products, categoryFilter, selectedCategories, searchQuery, priceRange, sortBy]);
+  }, [categoryFilter, selectedCategories, searchQuery, priceRange, sortBy]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/products');
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   const handleCategoryChange = (categoryId: string, checked: boolean) => {
     if (checked) {
@@ -75,41 +91,16 @@ export default function Products() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading products...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-4 py-4 md:py-8">
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
-        {/* Mobile Filter Toggle */}
-        <div className="lg:hidden mb-4">
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className="w-full"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            {showFilters ? 'Hide Filters' : 'Show Filters'}
-          </Button>
-        </div>
-
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col lg:flex-row gap-8">
         {/* Filters Sidebar */}
-        <div className={`lg:w-1/4 space-y-4 lg:space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-          <div className="bg-card p-4 lg:p-6 rounded-lg border">
+        <div className={`lg:w-1/4 space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+          <div className="bg-card p-6 rounded-lg border">
             <h3 className="font-semibold mb-4">Filters</h3>
             
             {/* Search */}
-            <div className="space-y-2 mb-4 lg:mb-6">
+            <div className="space-y-2 mb-6">
               <label className="text-sm font-medium">Search</label>
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -123,15 +114,15 @@ export default function Products() {
             </div>
 
             {/* Categories */}
-            <div className="space-y-2 mb-4 lg:mb-6">
+            <div className="space-y-2 mb-6">
               <label className="text-sm font-medium">Categories</label>
               {categories.map((category) => (
                 <div key={category.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={category.id}
-                    checked={selectedCategories.includes(category.name)}
+                    checked={selectedCategories.includes(category.id)}
                     onCheckedChange={(checked) => 
-                      handleCategoryChange(category.name, checked as boolean)
+                      handleCategoryChange(category.id, checked as boolean)
                     }
                   />
                   <label htmlFor={category.id} className="text-sm">
@@ -150,15 +141,15 @@ export default function Products() {
                   placeholder="Min"
                   value={priceRange[0]}
                   onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-                  className="w-full"
+                  className="w-20"
                 />
-                <span className="text-sm">-</span>
+                <span>-</span>
                 <Input
                   type="number"
                   placeholder="Max"
                   value={priceRange[1]}
-                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 5000])}
-                  className="w-full"
+                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 1000])}
+                  className="w-20"
                 />
               </div>
             </div>
@@ -168,36 +159,46 @@ export default function Products() {
         {/* Products */}
         <div className="lg:w-3/4">
           {/* Header */}
-          <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0 mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
             <div>
-              <h1 className="text-xl md:text-2xl font-bold">
+              <h1 className="text-2xl font-bold">
                 {categoryFilter 
-                  ? categories.find(c => c.name === categoryFilter)?.name || 'Products'
+                  ? categories.find(c => c.id === categoryFilter)?.name || 'Products'
                   : 'All Products'
                 }
               </h1>
-              <p className="text-sm md:text-base text-muted-foreground">
+              <p className="text-muted-foreground">
                 {filteredProducts.length} products found
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="lg:hidden"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filters
+              </Button>
+
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-40">
+                <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="created_at">Newest First</SelectItem>
+                  <SelectItem value="popularity">Popularity</SelectItem>
                   <SelectItem value="price-low">Price: Low to High</SelectItem>
                   <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="title">Name A-Z</SelectItem>
+                  <SelectItem value="rating">Rating</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -205,13 +206,14 @@ export default function Products() {
 
           {filteredProducts.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">No products found matching your criteria.</p>
+              <p className="text-muted-foreground">No products found matching your criteria.</p>
               <Button
                 variant="outline"
+                className="mt-4"
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedCategories([]);
-                  setPriceRange([0, 5000]);
+                  setPriceRange([0, 1000]);
                 }}
               >
                 Clear Filters

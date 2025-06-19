@@ -12,7 +12,7 @@ import logo from '@/images/logo3.1.png';
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { itemCount } = useCart();
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
 
   const navigation = [
@@ -69,7 +69,7 @@ export function Header() {
             {user ? (
               <div className="hidden md:flex items-center space-x-2">
                 <span className="text-sm text-muted-foreground">Hi, {user.name}</span>
-                <Button variant="ghost" size="sm" onClick={signOut}>
+                <Button variant="ghost" size="sm" onClick={logout}>
                   Logout
                 </Button>
               </div>
@@ -132,7 +132,7 @@ export function Header() {
             {user ? (
               <div className="flex items-center justify-between pt-2 border-t">
                 <span className="text-sm text-muted-foreground">Hi, {user.name}</span>
-                <Button variant="ghost" size="sm" onClick={signOut}>
+                <Button variant="ghost" size="sm" onClick={logout}>
                   Logout
                 </Button>
               </div>

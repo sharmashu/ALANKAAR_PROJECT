@@ -6,17 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ProductCard } from '@/components/ProductCard';
 import { useCart } from '@/contexts/CartContext';
-import { useProducts } from '@/hooks/useProducts';
+import { allProducts } from '@/data/mockData';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { addItem } = useCart();
-  const { products } = useProducts();
   const [selectedSize, setSelectedSize] = useState('A4');
   const [quantity, setQuantity] = useState(1);
 
-  const product = products.find(p => p.id === id);
-  const relatedProducts = products
+  const product = allProducts.find(p => p.id === id);
+  const relatedProducts = allProducts
     .filter(p => p.id !== id && p.category === product?.category)
     .slice(0, 4);
 
@@ -34,9 +33,9 @@ export default function ProductDetail() {
   const handleAddToCart = () => {
     addItem({
       id: product.id,
-      name: product.title,
+      name: product.name,
       price: product.price,
-      image: product.image || '',
+      image: product.image,
       size: selectedSize,
       quantity,
     });
@@ -67,8 +66,8 @@ export default function ProductDetail() {
         <div className="space-y-4">
           <div className="aspect-square bg-muted rounded-lg overflow-hidden">
             <img
-              src={product.image || '/placeholder.svg'}
-              alt={product.title}
+              src={product.image}
+              alt={product.name}
               className="w-full h-full object-cover"
             />
           </div>
@@ -78,8 +77,8 @@ export default function ProductDetail() {
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="aspect-square bg-muted rounded border cursor-pointer hover:border-primary">
                 <img
-                  src={product.image || '/placeholder.svg'}
-                  alt={`${product.title} view ${i}`}
+                  src={product.image}
+                  alt={`${product.name} view ${i}`}
                   className="w-full h-full object-cover rounded"
                 />
               </div>
@@ -90,17 +89,22 @@ export default function ProductDetail() {
         {/* Product Info */}
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
+            <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
             <div className="flex items-center space-x-4 mb-4">
               <div className="flex items-center space-x-1">
                 <Star className="h-4 w-4 fill-primary text-primary" />
-                <span className="font-medium">4.5</span>
+                <span className="font-medium">{product.rating}</span>
                 <span className="text-muted-foreground">(248 reviews)</span>
               </div>
             </div>
             
             <div className="flex items-center space-x-4 mb-6">
               <span className="text-3xl font-bold text-primary">₹{product.price}</span>
+              {product.originalPrice && (
+                <span className="text-xl text-muted-foreground line-through">
+                  ₹{product.originalPrice}
+                </span>
+              )}
             </div>
           </div>
 
@@ -108,7 +112,9 @@ export default function ProductDetail() {
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
             <p className="text-muted-foreground leading-relaxed">
-              {product.description || 'Transform your space with this stunning piece of art. High-quality printing on premium paper ensures vibrant colors and sharp details that will last for years.'}
+              Transform your space with this stunning piece of art. High-quality printing on premium paper 
+              ensures vibrant colors and sharp details that will last for years. Perfect for living rooms, 
+              bedrooms, offices, or any space that needs a touch of creativity.
             </p>
           </div>
 

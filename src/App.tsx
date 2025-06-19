@@ -10,7 +10,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { AdminRoute } from "@/components/admin/AdminRoute";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -43,11 +42,7 @@ const App = () => (
               <div className="min-h-screen flex flex-col">
                 <Routes>
                   {/* Admin Routes */}
-                  <Route path="/admin" element={
-                    <AdminRoute>
-                      <AdminLayout />
-                    </AdminRoute>
-                  }>
+                  <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="products" element={<AdminProducts />} />
                     <Route path="orders" element={<AdminOrders />} />
