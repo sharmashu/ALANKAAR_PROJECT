@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,13 +5,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useCart } from '@/contexts/CartContext';
 
 export interface Product {
+  _id: string;
   id: string;
   name: string;
   price: number;
-  image: string;
-  category: string;
-  rating?: number;
-  originalPrice?: number;
+  description: string;
+  images: string[];
+  features: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface ProductCardProps {
@@ -28,18 +29,21 @@ export function ProductCard({ product }: ProductCardProps) {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: product.images[0] || '', // Use first image as main image
     });
   };
 
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
-      <Link to={`/product/${product.id}`}>
+      <Link to={`/product/${product._id}`}>
         <div className="aspect-square overflow-hidden bg-muted">
           <img
-            src={product.image}
+            src={product.images?.[0] || '/placeholder-image.jpg'}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            onError={(e) => {
+              e.currentTarget.src = '/placeholder-image.jpg';
+            }}
           />
         </div>
       </Link>
@@ -50,23 +54,13 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h3>
           
-          <div className="flex items-center space-x-1">
-            {product.rating && (
-              <>
-                <Star className="h-3 w-3 fill-primary text-primary" />
-                <span className="text-xs text-muted-foreground">{product.rating}</span>
-              </>
-            )}
-          </div>
+          <p className="text-xs text-muted-foreground line-clamp-2">
+            {product.description}
+          </p>
           
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <span className="font-bold text-primary">₹{product.price}</span>
-              {product.originalPrice && (
-                <span className="text-xs text-muted-foreground line-through">
-                  ₹{product.originalPrice}
-                </span>
-              )}
             </div>
             
             <Button
