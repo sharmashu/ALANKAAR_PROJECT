@@ -17,6 +17,8 @@ const categories = [
   { id: 'gaming', name: 'Gaming' }
 ];
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
@@ -102,7 +104,7 @@ export default function Products() {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('http://localhost:5000/api/products');
+        const response = await fetch(`${API_BASE_URL}/api/products`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

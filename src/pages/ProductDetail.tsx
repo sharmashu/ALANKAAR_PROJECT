@@ -17,6 +17,8 @@ export default function ProductDetail() {
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -24,7 +26,7 @@ export default function ProductDetail() {
         setError(null);
         
         // Fetch the specific product
-        const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
         if (!response.ok) {
           throw new Error('Product not found');
         }
@@ -32,7 +34,7 @@ export default function ProductDetail() {
         setProduct(productData);
         
         // Fetch all products for related products
-        const allProductsResponse = await fetch('http://localhost:5000/api/products');
+        const allProductsResponse = await fetch(`${API_BASE_URL}/api/products`);
         if (allProductsResponse.ok) {
           const allProducts = await allProductsResponse.json();
           // Get related products (first 4 products excluding current)
