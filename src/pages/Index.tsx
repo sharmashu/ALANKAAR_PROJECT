@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,29 +6,75 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ProductCard } from '@/components/ProductCard';
 import { categories, featuredProducts } from '@/data/mockData';
 
-export default function Index() {
-  // Sample poster images for the hero galleries
-  const posterGallery1 = [
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=300&h=400&fit=crop",
-  ];
+// Define the Product interface
+interface Product {
+  _id: string;
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  images: string[];
+  features: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-  const posterGallery2 = [
-    "https://images.unsplash.com/photo-1582561833949-7fffaaf8cc81?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=300&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1582561833949-7fffaaf8cc81?w=300&h=400&fit=crop",
-  ];
+export default function Index() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  // Fetch products from backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch(`${API_BASE_URL}/api/products`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setError('Failed to load products. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [API_BASE_URL]);
+
+  // Extract images from products for carousel with product mapping
+  const getCarouselImages = () => {
+    const imageProductMap: { image: string; productId: string; productName: string }[] = [];
+    
+    products.forEach(product => {
+      if (product.images && product.images.length > 0) {
+        // Add all images from each product with product info
+        product.images.forEach(image => {
+          if (image && !imageProductMap.find(item => item.image === image)) {
+            imageProductMap.push({
+              image,
+              productId: product._id,
+              productName: product.name
+            });
+          }
+        });
+      }
+    });
+    
+    return imageProductMap;
+  };
+
+  const carouselImages = getCarouselImages();
+  
+  // Split images into two rows for the carousel effect
+  const posterGallery1 = carouselImages.slice(0, Math.ceil(carouselImages.length / 2));
+  const posterGallery2 = carouselImages.slice(Math.ceil(carouselImages.length / 2));
 
   const offers = [
     "BUY 4 GET 3 FREE!",
@@ -40,6 +87,32 @@ export default function Index() {
     "BUY 5 GET 5 FREE!",
     "BUY 6 GET 12 FREE!",
   ];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -70,38 +143,63 @@ export default function Index() {
           </div>
 
           {/* First Row - Sliding Right to Left */}
-          <div className="mb-6 overflow-hidden">
-            <div className="animate-scroll-right whitespace-nowrap">
-              <div className="inline-flex space-x-4">
-                {[...posterGallery1, ...posterGallery1].map((image, index) => (
-                  <div key={index} className="relative flex-shrink-0">
-                    <img
-                      src={image}
-                      alt={`Poster ${index + 1}`}
-                      className="w-32 h-40 md:w-40 md:h-52 lg:w-48 lg:h-60 object-cover rounded-lg shadow-lg"
-                    />
-                  </div>
-                ))}
+          {posterGallery1.length > 0 && (
+            <div className="mb-6 overflow-hidden">
+              <div className="animate-scroll-right whitespace-nowrap">
+                <div className="inline-flex space-x-4">
+                  {[...posterGallery1, ...posterGallery1].map((imageData, index) => (
+                    <Link 
+                      key={index} 
+                      to={`/product/${imageData.productId}`}
+                      className="relative flex-shrink-0 hover:scale-105 transition-transform duration-300"
+                    >
+                      <img
+                        src={imageData.image}
+                        alt={imageData.productName}
+                        className="w-32 h-40 md:w-40 md:h-52 lg:w-48 lg:h-60 object-cover rounded-lg shadow-lg cursor-pointer"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
+                      />
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Second Row - Sliding Left to Right */}
-          <div className="mb-8 overflow-hidden">
-            <div className="animate-scroll-left whitespace-nowrap">
-              <div className="inline-flex space-x-4">
-                {[...posterGallery2, ...posterGallery2].map((image, index) => (
-                  <div key={index} className="relative flex-shrink-0">
-                    <img
-                      src={image}
-                      alt={`Poster ${index + 1}`}
-                      className="w-32 h-40 md:w-40 md:h-52 lg:w-48 lg:h-60 object-cover rounded-lg shadow-lg"
-                    />
-                  </div>
-                ))}
+          {posterGallery2.length > 0 && (
+            <div className="mb-8 overflow-hidden">
+              <div className="animate-scroll-left whitespace-nowrap">
+                <div className="inline-flex space-x-4">
+                  {[...posterGallery2, ...posterGallery2].map((imageData, index) => (
+                    <Link 
+                      key={index} 
+                      to={`/product/${imageData.productId}`}
+                      className="relative flex-shrink-0 hover:scale-105 transition-transform duration-300"
+                    >
+                      <img
+                        src={imageData.image}
+                        alt={imageData.productName}
+                        className="w-32 h-40 md:w-40 md:h-52 lg:w-48 lg:h-60 object-cover rounded-lg shadow-lg cursor-pointer"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
+                      />
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Fallback if no images are available */}
+          {carouselImages.length === 0 && (
+            <div className="mb-8 text-center">
+              <p className="text-muted-foreground">No product images available</p>
+            </div>
+          )}
 
           {/* CTA Buttons */}
           <div className="text-center">
@@ -184,7 +282,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Best Sellers */}
+      {/* Best Sellers - Now using real products from backend */}
       <section className="py-16 lg:py-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -195,17 +293,9 @@ export default function Index() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {products.slice(0, 6).map((product) => (
+              <ProductCard key={product._id} product={product} />
             ))}
-          </div>
-          
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              <Link to="/products" className="flex items-center">
-                View All Products <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
           </div>
         </div>
       </section>
