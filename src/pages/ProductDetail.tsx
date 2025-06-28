@@ -117,11 +117,13 @@ export default function ProductDetail() {
         <div className="space-y-4">
           <div className="aspect-square bg-muted rounded-lg overflow-hidden">
             <img
-              src={product.images[selectedImage] || '/placeholder-image.jpg'}
+              src={product.images[selectedImage] || '/placeholder.svg'}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-lg"
               onError={(e) => {
-                e.currentTarget.src = '/placeholder-image.jpg';
+                if (!e.currentTarget.src.includes('placeholder.svg')) {
+                  e.currentTarget.src = '/placeholder.svg';
+                }
               }}
             />
           </div>
@@ -142,7 +144,9 @@ export default function ProductDetail() {
                     alt={`${product.name} view ${index + 1}`}
                     className="w-full h-full object-cover rounded"
                     onError={(e) => {
-                      e.currentTarget.src = '/placeholder-image.jpg';
+                      if (!e.currentTarget.src.includes('placeholder.svg')) {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }
                     }}
                   />
                 </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,10 @@ interface Product {
   updatedAt: string;
 }
 
+// Cache key for localStorage
+const CACHE_KEY = 'alankaar_carousel_cache';
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
 export default function Index() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,17 +30,46 @@ export default function Index() {
   
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  // Fetch products from backend
+  // Fetch products from backend with caching
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError(null);
+
+        // Check if we have cached data
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        if (cachedData) {
+          const { data, timestamp } = JSON.parse(cachedData);
+          const now = Date.now();
+          
+          // Check if cache is still valid (less than 24 hours old)
+          if (now - timestamp < CACHE_DURATION) {
+            console.log('Using cached carousel data');
+            setProducts(data);
+            setLoading(false);
+            return;
+          } else {
+            // Cache expired, remove it
+            localStorage.removeItem(CACHE_KEY);
+          }
+        }
+
+        // Fetch fresh data from API
+        console.log('Fetching fresh carousel data from API');
         const response = await fetch(`${API_BASE_URL}/api/products`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        
+        // Cache the data with timestamp
+        const cacheData = {
+          data,
+          timestamp: Date.now()
+        };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+        
         setProducts(data);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -48,8 +81,8 @@ export default function Index() {
     fetchProducts();
   }, [API_BASE_URL]);
 
-  // Extract images from products for carousel with product mapping
-  const getCarouselImages = () => {
+  // Memoized carousel images to prevent recalculation on every render
+  const carouselImages = useMemo(() => {
     const imageProductMap: { image: string; productId: string; productName: string }[] = [];
     
     products.forEach(product => {
@@ -68,13 +101,14 @@ export default function Index() {
     });
     
     return imageProductMap;
-  };
-
-  const carouselImages = getCarouselImages();
+  }, [products]);
   
-  // Split images into two rows for the carousel effect
-  const posterGallery1 = carouselImages.slice(0, Math.ceil(carouselImages.length / 2));
-  const posterGallery2 = carouselImages.slice(Math.ceil(carouselImages.length / 2));
+  // Memoized gallery splits to prevent recalculation
+  const { posterGallery1, posterGallery2 } = useMemo(() => {
+    const gallery1 = carouselImages.slice(0, Math.ceil(carouselImages.length / 2));
+    const gallery2 = carouselImages.slice(Math.ceil(carouselImages.length / 2));
+    return { posterGallery1: gallery1, posterGallery2: gallery2 };
+  }, [carouselImages]);
 
   const offers = [
     "BUY 4 GET 3 FREE!",
@@ -87,6 +121,14 @@ export default function Index() {
     "BUY 5 GET 5 FREE!",
     "BUY 6 GET 12 FREE!",
   ];
+
+  // Function to clear cache (useful for development or when data is stale)
+  const clearCache = () => {
+    localStorage.removeItem(CACHE_KEY);
+    console.log('Cache cleared');
+    // Reload the page to fetch fresh data
+    window.location.reload();
+  };
 
   // Show loading state
   if (loading) {
@@ -106,9 +148,14 @@ export default function Index() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-500 mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()}>
-            Try Again
-          </Button>
+          <div className="space-y-2">
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+            <Button variant="outline" onClick={clearCache} className="ml-2">
+              Clear Cache & Retry
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -158,7 +205,9 @@ export default function Index() {
                         alt={imageData.productName}
                         className="w-32 h-40 md:w-40 md:h-52 lg:w-48 lg:h-60 object-cover rounded-lg shadow-lg cursor-pointer"
                         onError={(e) => {
-                          e.currentTarget.src = '/placeholder.svg';
+                          if (!e.currentTarget.src.includes('placeholder.svg')) {
+                            e.currentTarget.src = '/placeholder.svg';
+                          }
                         }}
                       />
                     </Link>
@@ -184,7 +233,9 @@ export default function Index() {
                         alt={imageData.productName}
                         className="w-32 h-40 md:w-40 md:h-52 lg:w-48 lg:h-60 object-cover rounded-lg shadow-lg cursor-pointer"
                         onError={(e) => {
-                          e.currentTarget.src = '/placeholder.svg';
+                          if (!e.currentTarget.src.includes('placeholder.svg')) {
+                            e.currentTarget.src = '/placeholder.svg';
+                          }
                         }}
                       />
                     </Link>

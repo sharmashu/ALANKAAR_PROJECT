@@ -38,11 +38,13 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link to={`/product/${product._id}`}>
         <div className="aspect-square overflow-hidden bg-muted">
           <img
-            src={product.images?.[0] || '/placeholder-image.jpg'}
+            src={product.images?.[0] || '/placeholder.svg'}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             onError={(e) => {
-              e.currentTarget.src = '/placeholder-image.jpg';
+              if (!e.currentTarget.src.includes('placeholder.svg')) {
+                e.currentTarget.src = '/placeholder.svg';
+              }
             }}
           />
         </div>
