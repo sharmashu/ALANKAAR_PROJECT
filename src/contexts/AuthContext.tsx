@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { config, getApiUrl } from '@/config/environment';
 
 interface User {
   id: string;
@@ -16,8 +17,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -38,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(getApiUrl('/auth/login'), {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -69,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Starting registration process...', { email, name });
     try {
       console.log('Sending registration request to server...');
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      const response = await fetch(getApiUrl('/auth/register'), {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -105,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resendVerification = async (email: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/resend-verification`, {
+      const response = await fetch(getApiUrl('/auth/resend-verification'), {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

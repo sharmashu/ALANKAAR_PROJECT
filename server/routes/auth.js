@@ -59,7 +59,42 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Verify email
+// Verify email with redirect to frontend
+router.get('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.redirect(`${process.env.FRONTEND_URL || process.env.VITE_API_BASE_URL}/verify-email?error=no-token`);
+    }
+
+    const user = await User.findOne({
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.redirect(`${process.env.FRONTEND_URL || process.env.VITE_API_BASE_URL}/verify-email?error=invalid-token`);
+    }
+
+    // Mark email as verified
+    user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    logger.info('Email verified successfully', { email: user.email, userId: user._id });
+
+    // Redirect to frontend with success
+    res.redirect(`${process.env.FRONTEND_URL || process.env.VITE_API_BASE_URL}/verify-email?token=${token}&status=success`);
+
+  } catch (error) {
+    logger.error('Email verification error', { error: error.message });
+    res.redirect(`${process.env.FRONTEND_URL || process.env.VITE_API_BASE_URL}/verify-email?error=server-error`);
+  }
+});
+
+// Verify email (API endpoint)
 router.get('/verify-email/:token', async (req, res) => {
   try {
     const { token } = req.params;

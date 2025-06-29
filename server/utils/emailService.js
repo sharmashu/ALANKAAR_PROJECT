@@ -17,7 +17,9 @@ export const sendVerificationEmail = async (email, name, token) => {
   try {
     const transporter = createTransporter();
     
-    const verificationUrl = `${process.env.VITE_API_BASE_URL}/verify-email?token=${token}`;
+    // Use same domain for single deployment with rewrites
+    const baseUrl = process.env.VITE_API_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3000';
+    const verificationUrl = `${baseUrl}/verify-email?token=${token}`;
     
     const mailOptions = {
       from: process.env.EMAIL_USER,
