@@ -19,6 +19,7 @@ import NeonLed from "./pages/NeonLed";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
+import VerifyEmail from "./pages/VerifyEmail";
 import OrderSuccess from "./pages/OrderSuccess";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -65,6 +66,7 @@ const App = () => (
                           <Route path="/about" element={<About />} />
                           <Route path="/contact" element={<Contact />} />
                           <Route path="/login" element={<Login />} />
+                          <Route path="/verify-email" element={<VerifyEmail />} />
                           <Route path="/order-success" element={<OrderSuccess />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>

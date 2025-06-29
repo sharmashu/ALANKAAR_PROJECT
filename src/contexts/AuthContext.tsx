@@ -10,6 +10,7 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
+  resendVerification: (email: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -47,7 +48,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
+        // Check if email is not verified
+        if (data.emailNotVerified) {
+          throw new Error('Please verify your email before logging in');
+        }
+        throw new Error(data.message || 'Login failed');
       }
       setUser(data.user);
       localStorage.setItem('user', JSON.stringify(data.user));
@@ -78,13 +83,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!response.ok) {
         console.error('Registration failed:', data.error);
-        throw new Error(data.error || 'Registration failed');
+        throw new Error(data.message || 'Registration failed');
       }
       
-      console.log('Registration successful, setting user data...');
-      setUser(data.user);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      console.log('User data saved successfully');
+      // Store email for potential resend verification
+      localStorage.setItem('pendingVerificationEmail', email);
+      
+      console.log('Registration successful, email verification required');
+      // Don't set user as logged in since email verification is required
     } catch (error: any) {
       console.error('Registration error details:', {
         message: error.message,
@@ -97,9 +103,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resendVerification = async (email: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/resend-verification`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to resend verification email');
+      }
+      
+      return data;
+    } catch (error: any) {
+      console.error('Resend verification error:', error);
+      throw new Error(error.message || 'Failed to resend verification email');
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('pendingVerificationEmail');
   };
 
   return (
@@ -108,6 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         login,
         register,
+        resendVerification,
         logout,
         isLoading,
       }}
