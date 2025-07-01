@@ -109,19 +109,14 @@ export default function About() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              name: 'Rajesh Kumar',
+              name: 'Krishna Aashutosh Sharma',
               role: 'Founder & CEO',
               image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop',
             },
             {
-              name: 'Priya Sharma',
+              name: 'Bethel Mathew',
               role: 'Head of Design',
               image: 'https://images.unsplash.com/photo-1494790108755-2616b612b17c?w=300&h=300&fit=crop',
-            },
-            {
-              name: 'Amit Patel',
-              role: 'Production Manager',
-              image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop',
             },
           ].map((member, index) => (
             <Card key={index} className="text-center overflow-hidden">
