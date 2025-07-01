@@ -5,8 +5,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ProductCard } from '@/components/ProductCard';
-import { allProducts, categories } from '@/data/mockData';
+import { ProductCard, Product } from '@/components/ProductCard';
+
+// Categories based on the products we have
+const categories = [
+  { id: 'electronics', name: 'Electronics' },
+  { id: 'fitness', name: 'Fitness & Health' },
+  { id: 'clothing', name: 'Clothing' },
+  { id: 'home', name: 'Home & Kitchen' },
+  { id: 'accessories', name: 'Accessories' },
+  { id: 'gaming', name: 'Gaming' }
+];
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -15,28 +26,51 @@ export default function Products() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [sortBy, setSortBy] = useState('popularity');
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const categoryFilter = searchParams.get('category');
 
   const filteredProducts = useMemo(() => {
-    let filtered = allProducts;
+    let filtered = products;
 
     // Apply category filter from URL
     if (categoryFilter) {
-      filtered = filtered.filter(product => product.category === categoryFilter);
+      filtered = filtered.filter(product => {
+        // Simple category detection based on product name/description
+        const productText = `${product.name} ${product.description}`.toLowerCase();
+        if (categoryFilter === 'electronics' && (productText.includes('wireless') || productText.includes('bluetooth') || productText.includes('smart') || productText.includes('charging'))) return true;
+        if (categoryFilter === 'fitness' && (productText.includes('fitness') || productText.includes('yoga') || productText.includes('health'))) return true;
+        if (categoryFilter === 'clothing' && (productText.includes('shirt') || productText.includes('cotton'))) return true;
+        if (categoryFilter === 'home' && (productText.includes('coffee') || productText.includes('kitchen') || productText.includes('cutting'))) return true;
+        if (categoryFilter === 'accessories' && (productText.includes('wallet') || productText.includes('water bottle'))) return true;
+        if (categoryFilter === 'gaming' && productText.includes('gaming')) return true;
+        return false;
+      });
     }
 
     // Apply selected categories filter
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter(product => selectedCategories.includes(product.category));
+      filtered = filtered.filter(product => {
+        const productText = `${product.name} ${product.description}`.toLowerCase();
+        return selectedCategories.some(category => {
+          if (category === 'electronics' && (productText.includes('wireless') || productText.includes('bluetooth') || productText.includes('smart') || productText.includes('charging'))) return true;
+          if (category === 'fitness' && (productText.includes('fitness') || productText.includes('yoga') || productText.includes('health'))) return true;
+          if (category === 'clothing' && (productText.includes('shirt') || productText.includes('cotton'))) return true;
+          if (category === 'home' && (productText.includes('coffee') || productText.includes('kitchen') || productText.includes('cutting'))) return true;
+          if (category === 'accessories' && (productText.includes('wallet') || productText.includes('water bottle'))) return true;
+          if (category === 'gaming' && productText.includes('gaming')) return true;
+          return false;
+        });
+      });
     }
 
     // Apply search query
     if (searchQuery) {
       filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -53,35 +87,38 @@ export default function Products() {
       case 'price-high':
         filtered.sort((a, b) => b.price - a.price);
         break;
-      case 'rating':
-        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      case 'name':
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
         break;
       default:
-        // popularity - keep original order
+        // popularity - keep original order (by creation date)
+        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
     }
 
     return filtered;
-  }, [categoryFilter, selectedCategories, searchQuery, priceRange, sortBy]);
+  }, [products, categoryFilter, selectedCategories, searchQuery, priceRange, sortBy]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/products');
+        setLoading(true);
+        setError(null);
+        const response = await fetch(`${API_BASE_URL}/api/products`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         setProducts(data);
       } catch (error) {
         console.error('Error fetching products:', error);
+        setError('Failed to load products. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
     fetchProducts();
   }, []);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   const handleCategoryChange = (categoryId: string, checked: boolean) => {
     if (checked) {
@@ -90,6 +127,32 @@ export default function Products() {
       setSelectedCategories(prev => prev.filter(id => id !== categoryId));
     }
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading products...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -189,9 +252,9 @@ export default function Products() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="popularity">Popularity</SelectItem>
+                  <SelectItem value="name">Name: A-Z</SelectItem>
                   <SelectItem value="price-low">Price: Low to High</SelectItem>
                   <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="rating">Rating</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -200,7 +263,7 @@ export default function Products() {
           {/* Products Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
 

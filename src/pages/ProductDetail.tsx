@@ -1,28 +1,79 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, ShoppingCart, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ProductCard } from '@/components/ProductCard';
+import { ProductCard, Product } from '@/components/ProductCard';
 import { useCart } from '@/contexts/CartContext';
-import { allProducts } from '@/data/mockData';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { addItem } = useCart();
   const [selectedSize, setSelectedSize] = useState('A4');
   const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState(0);
 
-  const product = allProducts.find(p => p.id === id);
-  const relatedProducts = allProducts
-    .filter(p => p.id !== id && p.category === product?.category)
-    .slice(0, 4);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  if (!product) {
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch the specific product
+        const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
+        if (!response.ok) {
+          throw new Error('Product not found');
+        }
+        const productData = await response.json();
+        setProduct(productData);
+        
+        // Fetch all products for related products
+        const allProductsResponse = await fetch(`${API_BASE_URL}/api/products`);
+        if (allProductsResponse.ok) {
+          const allProducts = await allProductsResponse.json();
+          // Get related products (first 4 products excluding current)
+          const related = allProducts
+            .filter((p: Product) => p.id !== productData.id)
+            .slice(0, 4);
+          setRelatedProducts(related);
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        setError('Failed to load product. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading product...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
+        <p className="text-muted-foreground mb-4">{error}</p>
         <Button asChild>
           <Link to="/products">Back to Products</Link>
         </Button>
@@ -35,7 +86,7 @@ export default function ProductDetail() {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: product.images[0] || '',
       size: selectedSize,
       quantity,
     });
@@ -66,45 +117,51 @@ export default function ProductDetail() {
         <div className="space-y-4">
           <div className="aspect-square bg-muted rounded-lg overflow-hidden">
             <img
-              src={product.image}
+              src={product.images[selectedImage] || '/placeholder.svg'}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-lg"
+              onError={(e) => {
+                if (!e.currentTarget.src.includes('placeholder.svg')) {
+                  e.currentTarget.src = '/placeholder.svg';
+                }
+              }}
             />
           </div>
           
-          {/* Thumbnail images would go here */}
-          <div className="grid grid-cols-4 gap-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="aspect-square bg-muted rounded border cursor-pointer hover:border-primary">
-                <img
-                  src={product.image}
-                  alt={`${product.name} view ${i}`}
-                  className="w-full h-full object-cover rounded"
-                />
-              </div>
-            ))}
-          </div>
+          {/* Thumbnail images */}
+          {product.images.length > 1 && (
+            <div className="grid grid-cols-4 gap-2">
+              {product.images.map((image, index) => (
+                <div 
+                  key={index} 
+                  className={`aspect-square bg-muted rounded border cursor-pointer hover:border-primary ${
+                    selectedImage === index ? 'border-primary' : ''
+                  }`}
+                  onClick={() => setSelectedImage(index)}
+                >
+                  <img
+                    src={image}
+                    alt={`${product.name} view ${index + 1}`}
+                    className="w-full h-full object-cover rounded"
+                    onError={(e) => {
+                      if (!e.currentTarget.src.includes('placeholder.svg')) {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="flex items-center space-x-1">
-                <Star className="h-4 w-4 fill-primary text-primary" />
-                <span className="font-medium">{product.rating}</span>
-                <span className="text-muted-foreground">(248 reviews)</span>
-              </div>
-            </div>
             
             <div className="flex items-center space-x-4 mb-6">
               <span className="text-3xl font-bold text-primary">₹{product.price}</span>
-              {product.originalPrice && (
-                <span className="text-xl text-muted-foreground line-through">
-                  ₹{product.originalPrice}
-                </span>
-              )}
             </div>
           </div>
 
@@ -112,11 +169,21 @@ export default function ProductDetail() {
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Transform your space with this stunning piece of art. High-quality printing on premium paper 
-              ensures vibrant colors and sharp details that will last for years. Perfect for living rooms, 
-              bedrooms, offices, or any space that needs a touch of creativity.
+              {product.description}
             </p>
           </div>
+
+          {/* Product Features */}
+          {product.features && product.features.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3">Features</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                {product.features.map((feature, index) => (
+                  <li key={index}>• {feature}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Size Selection */}
           <div>
@@ -168,18 +235,6 @@ export default function ProductDetail() {
               <Heart className="h-4 w-4" />
             </Button>
           </div>
-
-          {/* Product Features */}
-          <div className="border-t pt-6">
-            <h3 className="font-semibold mb-3">Features</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Premium quality printing</li>
-              <li>• Fade-resistant inks</li>
-              <li>• Ready to frame</li>
-              <li>• Fast shipping</li>
-              <li>• Satisfaction guaranteed</li>
-            </ul>
-          </div>
         </div>
       </div>
 
@@ -189,7 +244,7 @@ export default function ProductDetail() {
           <h2 className="text-2xl font-bold mb-8">Related Products</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {relatedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </div>

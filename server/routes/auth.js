@@ -1,106 +1,213 @@
 import express from 'express';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import User from '../models/User.js';
 import { logger } from '../config/winston.js';
+import { sendVerificationEmail } from '../utils/emailService.js';
 
 const router = express.Router();
 
-// Register
+// Register user with email verification
 router.post('/register', async (req, res) => {
   try {
-    logger.info('Received registration request with body:', {
-      email: req.body.email,
-      name: req.body.name,
-      hasPassword: !!req.body.password,
-      headers: req.headers
-    });
-    
     const { name, email, password } = req.body;
-    
+
     // Check if user already exists
-    logger.info('Checking for existing user...');
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      logger.warn('Registration failed: Email already exists', { email });
-      return res.status(400).json({ error: 'Email is already registered' });
+      return res.status(400).json({ message: 'User already exists' });
     }
-    logger.info('No existing user found with this email');
 
-    // Validate required fields
-    if (!name || !email || !password) {
-      logger.warn('Registration failed: Missing required fields', { 
-        hasName: !!name, 
-        hasEmail: !!email, 
-        hasPassword: !!password 
-      });
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-    logger.info('All required fields are present');
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      logger.warn('Registration failed: Invalid email format', { email });
-      return res.status(400).json({ error: 'Invalid email format' });
-    }
-    logger.info('Email format is valid');
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Validate password strength
-    if (password.length < 6) {
-      logger.warn('Registration failed: Password too short');
-      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
-    }
-    logger.info('Password meets minimum length requirement');
-
-    logger.info('Creating new user...');
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword });
-    
-    logger.info('Attempting to save user to database...');
-    try {
-      const savedUser = await user.save();
-      logger.info('User saved successfully:', { 
-        userId: savedUser._id,
-        email: savedUser.email,
-        name: savedUser.name
-      });
-      
-      logger.info('Generating JWT token...');
-      const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET);
-      logger.info('Sending successful response...');
-      res.status(201).json({ user: savedUser, token });
-    } catch (dbError) {
-      logger.error('Database error while saving user:', {
-        error: dbError.message,
-        code: dbError.code,
-        name: dbError.name
-      });
-      throw dbError;
-    }
-  } catch (error) {
-    logger.error('Registration error:', {
-      name: error.name,
-      message: error.message,
-      code: error.code,
-      stack: error.stack
+    // Create user
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+      emailVerificationToken: verificationToken,
+      emailVerificationExpires: verificationExpires
     });
-    res.status(400).json({ error: error.message || 'Registration failed' });
+
+    await user.save();
+
+    // Send verification email
+    try {
+      await sendVerificationEmail(email, name, verificationToken);
+    } catch (emailError) {
+      logger.error('Failed to send verification email', { email, error: emailError.message });
+      // Don't fail registration if email fails, but log it
+    }
+
+    logger.info('User registered successfully', { email, userId: user._id });
+
+    res.status(201).json({ 
+      message: 'Registration successful. Please check your email to verify your account.',
+      userId: user._id 
+    });
+
+  } catch (error) {
+    logger.error('Registration error', { error: error.message });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Login
+// Verify email with redirect to frontend
+router.get('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.redirect(`${process.env.FRONTEND_URL || process.env.VITE_API_BASE_URL}/verify-email?error=no-token`);
+    }
+
+    const user = await User.findOne({
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.redirect(`${process.env.FRONTEND_URL || process.env.VITE_API_BASE_URL}/verify-email?error=invalid-token`);
+    }
+
+    // Mark email as verified
+    user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    logger.info('Email verified successfully', { email: user.email, userId: user._id });
+
+    // Redirect to frontend with success
+    res.redirect(`${process.env.FRONTEND_URL || process.env.VITE_API_BASE_URL}/verify-email?token=${token}&status=success`);
+
+  } catch (error) {
+    logger.error('Email verification error', { error: error.message });
+    res.redirect(`${process.env.FRONTEND_URL || process.env.VITE_API_BASE_URL}/verify-email?error=server-error`);
+  }
+});
+
+// Verify email (API endpoint)
+router.get('/verify-email/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired verification token' });
+    }
+
+    // Mark email as verified
+    user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    logger.info('Email verified successfully', { email: user.email, userId: user._id });
+
+    res.json({ message: 'Email verified successfully' });
+
+  } catch (error) {
+    logger.error('Email verification error', { error: error.message });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Resend verification email
+router.post('/resend-verification', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.emailVerified) {
+      return res.status(400).json({ message: 'Email is already verified' });
+    }
+
+    // Generate new verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    user.emailVerificationToken = verificationToken;
+    user.emailVerificationExpires = verificationExpires;
+    await user.save();
+
+    // Send verification email
+    try {
+      await sendVerificationEmail(email, user.name, verificationToken);
+      res.json({ message: 'Verification email sent successfully' });
+    } catch (emailError) {
+      logger.error('Failed to send verification email', { email, error: emailError.message });
+      res.status(500).json({ message: 'Failed to send verification email' });
+    }
+
+  } catch (error) {
+    logger.error('Resend verification error', { error: error.message });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Login with email verification check
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Find user
     const user = await User.findOne({ email });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.json({ user, token });
+
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Check if email is verified
+    if (!user.emailVerified) {
+      return res.status(401).json({ 
+        message: 'Please verify your email before logging in',
+        emailNotVerified: true 
+      });
+    }
+
+    // Create JWT token
+    const token = jwt.sign(
+      { userId: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    logger.info('User logged in successfully', { email, userId: user._id });
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    logger.error('Login error', { error: error.message });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

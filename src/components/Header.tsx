@@ -16,11 +16,13 @@ export function Header() {
   const location = useLocation();
 
   const navigation = [
-    { name: 'NEW IN', href: '/products?filter=new' },
-    { name: 'POSTERS & ART', href: '/products' },
-    { name: 'CUSTOM DESIGNS', href: '/custom-poster' },
-    { name: 'NEON & LED', href: '/neon-led' },
-    { name: 'ABOUT', href: '/about' },
+
+    { name: 'Home', href: '/' },
+    { name: 'Products', href: '/products' },
+    { name: 'Custom Posters', href: '/custom-poster' },
+    //{ name: 'Neon & LED', href: '/neon-led' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   const isActive = (path: string) => location.pathname === path;

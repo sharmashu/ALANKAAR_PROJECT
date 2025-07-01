@@ -1,6 +1,7 @@
 import express from 'express';
 import Product from '../models/Product.js';
 import auth from '../middleware/auth.js';
+import { seedProducts } from '../data/sampleProducts.js';
 
 const router = express.Router();
 
@@ -22,6 +23,19 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
     res.json(product);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Seed database with sample products
+router.post('/seed', async (req, res) => {
+  try {
+    const insertedProducts = await seedProducts();
+    res.status(201).json({ 
+      message: `Successfully seeded ${insertedProducts.length} products`,
+      count: insertedProducts.length 
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

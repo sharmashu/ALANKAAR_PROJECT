@@ -5,14 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Mail, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, register, isLoading } = useAuth();
+  const { login, register, resendVerification, isLoading } = useAuth();
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,12 +27,21 @@ export default function Login() {
         description: "You have been successfully logged in.",
       });
       navigate('/');
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      if (error.message.includes('verify your email')) {
+        setShowResendVerification(true);
+        toast({
+          title: "Email not verified",
+          description: "Please verify your email before logging in. Check your inbox or request a new verification email.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Login failed",
+          description: error.message || "Please check your credentials and try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -48,15 +61,45 @@ export default function Login() {
       await register(registerData.email, registerData.password, registerData.name);
       toast({
         title: "Account created!",
-        description: "Your account has been created successfully.",
+        description: "Please check your email to verify your account before logging in.",
       });
-      navigate('/');
+      setShowResendVerification(true);
+      setLoginData(prev => ({ ...prev, email: registerData.email }));
     } catch (error: any) {
       toast({
         title: "Registration failed",
         description: error.message || "Please try again with different details.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const email = loginData.email || localStorage.getItem('pendingVerificationEmail');
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address to resend verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResendLoading(true);
+    try {
+      await resendVerification(email);
+      toast({
+        title: "Verification email sent!",
+        description: "Please check your inbox and click the verification link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to send verification",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -102,6 +145,25 @@ export default function Login() {
                     {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
+
+                {showResendVerification && (
+                  <Alert className="mt-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="flex flex-col space-y-2">
+                      <span>Your email needs to be verified before you can log in.</span>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleResendVerification}
+                        disabled={resendLoading}
+                        className="w-full"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        {resendLoading ? "Sending..." : "Resend Verification Email"}
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
               </TabsContent>
               
               <TabsContent value="register">

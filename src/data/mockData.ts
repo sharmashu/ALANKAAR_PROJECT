@@ -2,7 +2,7 @@
 export const categories = [
   { id: 'wall-posters', name: 'Wall Posters', image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=300&fit=crop' },
   { id: 'frames', name: 'Frames', image: 'https://images.unsplash.com/photo-1582053433976-25c00369fc93?w=300&h=300&fit=crop' },
-  { id: 'neon-signs', name: 'Neon Signs', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=300&fit=crop' },
+  //{ id: 'neon-signs', name: 'Neon Signs', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=300&fit=crop' },
   { id: 'custom-prints', name: 'Custom Prints', image: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=300&fit=crop' },
 ];
 
@@ -94,29 +94,29 @@ export const allProducts = [
   },
 ];
 
-export const neonLedProducts = [
-  {
-    id: 'neon-1',
-    name: 'Custom Text Neon Sign',
-    price: 699,
-    image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=400&fit=crop',
-    description: 'Personalized neon sign with your custom text. Available in multiple colors.',
-    features: ['Custom text', 'Multiple colors', 'Remote control', 'Energy efficient'],
-  },
-  {
-    id: 'neon-2',
-    name: 'LED Strip Lighting Kit',
-    price: 299,
-    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=400&fit=crop',
-    description: 'Smart LED strip kit perfect for gaming setups and ambient lighting.',
-    features: ['App controlled', 'Music sync', '16 million colors', 'Easy installation'],
-  },
-  {
-    id: 'neon-3',
-    name: 'Business Logo Sign',
-    price: 999,
-    image: 'https://images.unsplash.com/photo-1509803874385-db7c23652552?w=400&h=400&fit=crop',
-    description: 'Professional LED sign for your business. Custom logo and design.',
-    features: ['Weather resistant', 'Custom design', 'High brightness', 'Long lasting'],
-  },
-];
+// export const neonLedProducts = [
+//   {
+//     id: 'neon-1',
+//     name: 'Custom Text Neon Sign',
+//     price: 699,
+//     image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=400&fit=crop',
+//     description: 'Personalized neon sign with your custom text. Available in multiple colors.',
+//     features: ['Custom text', 'Multiple colors', 'Remote control', 'Energy efficient'],
+//   },
+//   {
+//     id: 'neon-2',
+//     name: 'LED Strip Lighting Kit',
+//     price: 299,
+//     image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=400&fit=crop',
+//     description: 'Smart LED strip kit perfect for gaming setups and ambient lighting.',
+//     features: ['App controlled', 'Music sync', '16 million colors', 'Easy installation'],
+//   },
+//   {
+//     id: 'neon-3',
+//     name: 'Business Logo Sign',
+//     price: 999,
+//     image: 'https://images.unsplash.com/photo-1509803874385-db7c23652552?w=400&h=400&fit=crop',
+//     description: 'Professional LED sign for your business. Custom logo and design.',
+//     features: ['Weather resistant', 'Custom design', 'High brightness', 'Long lasting'],
+//   },
+// ];
