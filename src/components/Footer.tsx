@@ -28,7 +28,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link to="/products" className="text-muted-foreground hover:text-primary transition-colors">All Products</Link></li>
               <li><Link to="/custom-poster" className="text-muted-foreground hover:text-primary transition-colors">Custom Posters</Link></li>
-              <li><Link to="/neon-led" className="text-muted-foreground hover:text-primary transition-colors">Neon & LED</Link></li>
+              {/*<li><Link to="/neon-led" className="text-muted-foreground hover:text-primary transition-colors">Neon & LED</Link></li>*/}
               <li><Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link></li>
             </ul>
           </div>

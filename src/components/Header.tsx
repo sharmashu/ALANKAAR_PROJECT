@@ -19,7 +19,7 @@ export function Header() {
     { name: 'Home', href: '/' },
     { name: 'Products', href: '/products' },
     { name: 'Custom Posters', href: '/custom-poster' },
-    { name: 'Neon & LED', href: '/neon-led' },
+    //{ name: 'Neon & LED', href: '/neon-led' },
     { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ];

@@ -15,7 +15,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import CustomPoster from "./pages/CustomPoster";
-import NeonLed from "./pages/NeonLed";
+//import NeonLed from "./pages/NeonLed";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -62,7 +62,7 @@ const App = () => (
                           <Route path="/cart" element={<Cart />} />
                           <Route path="/checkout" element={<Checkout />} />
                           <Route path="/custom-poster" element={<CustomPoster />} />
-                          <Route path="/neon-led" element={<NeonLed />} />
+                          {/*<Route path="/neon-led" element={<NeonLed />} />*/}
                           <Route path="/about" element={<About />} />
                           <Route path="/contact" element={<Contact />} />
                           <Route path="/login" element={<Login />} />

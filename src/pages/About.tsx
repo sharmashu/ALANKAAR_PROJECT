@@ -40,7 +40,7 @@ export default function About() {
             <h2 className="text-3xl font-bold mb-6">Our Story</h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                Founded in 2019, Interior Decor started with a simple vision: to make high-quality 
+                Founded in 2024, Interior Decor started with a simple vision: to make high-quality 
                 wall art and custom decorative solutions accessible to everyone. What began as a 
                 small team of design enthusiasts has grown into a trusted brand serving customers 
                 across the country.
@@ -111,12 +111,12 @@ export default function About() {
             {
               name: 'Krishna Aashutosh Sharma',
               role: 'Founder & CEO',
-              image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop',
+              image: '/aashu.jpg',
             },
             {
               name: 'Bethel Mathew',
               role: 'COO',
-              image: 'https://images.unsplash.com/photo-1494790108755-2616b612b17c?w=300&h=300&fit=crop',
+              image: '/bethel.jpg',
             },
           ].map((member, index) => (
             <Card key={index} className="text-center overflow-hidden">
