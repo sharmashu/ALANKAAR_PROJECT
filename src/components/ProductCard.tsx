@@ -34,28 +34,33 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
+
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
       <Link to={`/product/${product._id}`}>
         <div className="aspect-square overflow-hidden bg-muted">
+
           <img
             src={product.images?.[0] || '/placeholder.svg'}
             alt={product.name}
+
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             onError={(e) => {
               if (!e.currentTarget.src.includes('placeholder.svg')) {
                 e.currentTarget.src = '/placeholder.svg';
               }
             }}
+
           />
         </div>
       </Link>
       
-      <CardContent className="p-4">
+      <CardContent className="p-4 space-y-3">
         <div className="space-y-2">
-          <h3 className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2">
+          <h3 className="font-medium text-sm text-gray-800 dark:text-gray-200 group-hover:text-orange-500 transition-colors line-clamp-2 leading-tight">
             {product.name}
           </h3>
           
+
           <p className="text-xs text-muted-foreground line-clamp-2">
             {product.description}
           </p>
@@ -63,12 +68,12 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <span className="font-bold text-primary">₹{product.price}</span>
+
             </div>
             
             <Button
               size="sm"
-              variant="outline"
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 bg-orange-500 hover:bg-orange-600 text-white border-0"
               onClick={handleAddToCart}
             >
               <ShoppingCart className="h-3 w-3" />
@@ -78,4 +83,4 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardContent>
     </Card>
   );
-}
+}  

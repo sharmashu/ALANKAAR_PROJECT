@@ -111,6 +111,7 @@ export default function About() {
             {
               name: 'Krishna Aashutosh Sharma',
               role: 'Founder & CEO',
+
               image: '/aashu.jpg',
             },
             {
@@ -118,6 +119,7 @@ export default function About() {
               role: 'COO',
               image: '/bethel.jpg',
             },
+
           ].map((member, index) => (
             <Card key={index} className="text-center overflow-hidden">
               <div className="w-full h-64 overflow-hidden">
