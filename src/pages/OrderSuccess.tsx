@@ -1,16 +1,19 @@
-
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { CheckCircle, Download, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
+const EMAIL_USER = import.meta.env.VITE_EMAIL_USER || 'info@alankaar.com';
+
 export default function OrderSuccess() {
+  const location = useLocation();
+  const orderNumber = location.state?.orderNumber || ('ID' + Math.random().toString(36).substr(2, 9).toUpperCase());
   // Mock order data
   const orderData = {
-    orderNumber: 'ID' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+    orderNumber,
     total: 598,
     estimatedDelivery: '3-5 business days',
-    email: 'customer@example.com',
+    email: EMAIL_USER,
   };
 
   return (

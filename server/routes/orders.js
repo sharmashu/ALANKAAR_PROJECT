@@ -1,6 +1,8 @@
 import express from 'express';
 import Order from '../models/Order.js';
 import auth from '../middleware/auth.js';
+import { sendOrderDetailsEmail } from '../utils/emailService.js';
+import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
 
@@ -59,6 +61,29 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
     res.json({ message: 'Order deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Public endpoint to store order and send order details email
+router.post('/send-order-email', async (req, res) => {
+  try {
+    const orderDetails = req.body;
+    const orderNumber = uuidv4();
+    // If user is authenticated, get userId from req.user (if available)
+    let userId = undefined;
+    if (req.user && req.user._id) {
+      userId = req.user._id;
+    } else if (orderDetails.userId) {
+      userId = orderDetails.userId;
+    }
+    // Store order in DB
+    const order = new Order({ ...orderDetails, orderNumber, userId });
+    await order.save();
+    // Send email after DB entry
+    await sendOrderDetailsEmail({ ...orderDetails, orderNumber });
+    res.status(200).json({ message: 'Order stored and email sent successfully', orderNumber });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
