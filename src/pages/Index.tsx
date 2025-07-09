@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ProductCard } from '@/components/ProductCard';
 import { categories, featuredProducts } from '@/data/mockData';
 import { ProductSlider } from '@/components/ProductSlider';
+import { AuthTest } from '@/components/AuthTest';
 
 // Define the Product interface
 interface Product {
@@ -283,6 +284,13 @@ export default function Index() {
           <p className="text-2xl md:text-3xl font-serif text-white/90 max-w-4xl mx-auto">
             Join thousands of satisfied customers who have transformed their homes with our premium art collection.
           </p>
+        </div>
+      </section>
+
+      {/* JWT Authentication Test - Temporary for testing */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <AuthTest />
         </div>
       </section>
     </div>

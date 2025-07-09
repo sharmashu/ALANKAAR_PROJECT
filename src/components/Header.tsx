@@ -10,6 +10,7 @@ import logo from '@/images/logo4.png';
 
 export function Header() {
   const { itemCount } = useCart();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -66,10 +67,31 @@ export function Header() {
               </span>
             )}
           </Link>
-          <Link to="/login" className="flex items-center">
-            <User className="h-6 w-6 text-white mr-1" />
-            <span className="hidden sm:inline text-sm md:text-base font-bold text-white">Login</span>
-          </Link>
+          {user ? (
+            <div className="flex items-center space-x-2">
+              <span className="hidden sm:inline text-sm md:text-base font-bold text-white">
+                Welcome, {user.name}
+              </span>
+              {user.role === 'admin' && (
+                <Link to="/admin" className="hidden sm:inline text-sm md:text-base font-bold text-white bg-purple-600 px-2 py-1 rounded">
+                  Admin
+                </Link>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={logout}
+                className="text-white hover:text-white/80"
+              >
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <Link to="/login" className="flex items-center">
+              <User className="h-6 w-6 text-white mr-1" />
+              <span className="hidden sm:inline text-sm md:text-base font-bold text-white">Login</span>
+            </Link>
+          )}
         </div>
       </div>
       {/* Mobile Menu */}

@@ -7,12 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { getApiUrl } from '@/config/environment';
+import { api } from '@/lib/api';
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, total, clearCart } = useCart();
+  const { getAuthHeaders } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -53,16 +55,11 @@ export default function Checkout() {
 
     try {
       // Send order details to backend to email admin and get orderNumber
-      const response = await fetch(getApiUrl('/orders/send-order-email'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          items,
-          total: total + 99,
-        }),
+      const data = await api.post('/orders/send-order-email', {
+        ...formData,
+        items,
+        total: total + 99,
       });
-      const data = await response.json();
       clearCart();
       toast({
         title: 'Order placed successfully!',
