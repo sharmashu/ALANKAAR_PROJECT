@@ -11,8 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { api } from '@/lib/api';
 
 export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,8 +21,7 @@ export default function AdminOrders() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/orders`);
-        const data = await response.json();
+        const data = await api.get('/orders');
         setOrders(data);
       } catch (error) {
         console.error('Error fetching orders:', error);

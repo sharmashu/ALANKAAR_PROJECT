@@ -16,6 +16,17 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// Get orders for the logged-in user
+router.get('/my', auth, async (req, res) => {
+  try {
+    const userId = req.user.email;
+    const orders = await Order.find({ email: userId }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get a single order
 router.get('/:id', auth, async (req, res) => {
   try {
