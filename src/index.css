@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 290 22% 7%;
     --foreground: 0 0% 10%;
 
     --card: 0 0% 97.5%;
@@ -41,7 +41,7 @@
   }
 
   .dark {
-    --background: 0 0% 7%;
+    --background: 290 22% 7%;
     --foreground: 0 0% 95%;
 
     --card: 0 0% 12%;
@@ -130,7 +130,7 @@
   }
 
   .animate-carousel-fast {
-    animation: carousel-move 15s linear infinite;
+    animation: carousel-move 10s linear infinite;
   }
 
   .nav-underline {

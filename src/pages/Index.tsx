@@ -163,31 +163,53 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundImage: 'url("/img.jpg")', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+    <div className="min-h-screen bg-[#130a17]">
       {/* Hero Section */}
-      <section className="relative min-h-[400px] bg-gradient-to-br from-[#130a17] to-[#0c0712] flex items-center justify-center py-12 lg:py-20">
+      <section className="relative min-h-[400px] bg-[#130a17] flex items-center justify-center py-6 lg:py-7">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-4 gap-8">
           {/* Left: Heading and Tagline */}
-          <div className="flex-1 flex flex-col items-end justify-center max-w-md">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 text-white/90 leading-tight" style={{ fontFamily: 'Inria Serif, serif', textAlign: 'left' }}>
+          <div className="flex-1 flex flex-col justify-center max-w-md text-left ml-8">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 text-white/90 leading-tight" style={{ fontFamily: 'Inria Serif, serif' }}>
               <span className="block">Feel It.</span>
               <span className="block">Frame It.</span>
               <span className="block" style={{ color: '#FFD600' }}>Alankaar.</span>
             </h1>
-            <p className="text-base md:text-lg text-white/80 mt-4" style={{ textAlign: 'left', fontFamily: 'Inria Serif, serif', fontWeight: 500 }}>Wall decor that feels luxe, priced just right.</p>
+            <p className="text-base md:text-lg text-white/80 mt-4" style={{ fontFamily: 'Inria Serif, serif', fontWeight: 500 }}>Space decor that feels luxe, priced just right.</p>
           </div>
           {/* Right: Product Slider */}
           <div className="flex-1 flex items-center justify-center">
-            <div className="bg-black/90 rounded-3xl shadow-xl p-4 w-[340px] h-[340px] md:w-[400px] md:h-[400px] flex items-center justify-center overflow-hidden relative">
+            <div className="bg-black/90 rounded-3xl shadow-xl p-0 w-[340px] h-[340px] md:w-[1100px] md:h-[590px] flex items-center justify-center overflow-hidden relative">
               {/* Product Slider */}
               <ProductSlider products={products} />
             </div>
           </div>
         </div>
       </section>
+      
+      {/* Best Sellers - Now using real products from backend */}
+      <section className="py-16 lg:py-24 bg-[#130a17]">
+        <div className="w-full max-w-none px-0">
+          <div className="text-center mb-4">
+            <h2 className="text-3xl font-serif font-semibold mb-4 text-white">Best Sellers</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Our most popular products loved by customers worldwide
+            </p>
+          </div>
+          {/* Carousel */}
+          <div className="overflow-x-hidden overflow-y-hidden w-full flex items-center p-0 m-0">
+            <div className="flex flex-nowrap min-w-0 w-full animate-carousel-fast gap-4 items-center py-10">
+              {[...products, ...products].map((product, idx) => (
+                <div key={product._id + '-' + idx} className="flex-shrink-0 w-1/2 sm:w-1/4 lg:w-1/6 h-96 flex items-center justify-center">
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Featured Categories */}
-      <section className="py-16 lg:py-24">
+      <section className="py-16 lg:py-24 bg-[#130a17]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-serif font-semibold mb-4 text-white">Featured Categories</h2>
@@ -212,54 +234,34 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Best Sellers - Now using real products from backend */}
-      <section className="py-16 lg:py-24 bg-muted/30">
-        <div className="w-full max-w-none px-0">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Best Sellers</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Our most popular products loved by customers worldwide
-            </p>
-          </div>
-          {/* Carousel */}
-          <div className="overflow-x-hidden overflow-y-hidden w-full flex items-center p-0 m-0">
-            <div className="flex flex-nowrap min-w-0 w-full animate-carousel-fast gap-4 items-center py-32">
-              {[...products, ...products].map((product, idx) => (
-                <div key={product._id + '-' + idx} className="flex-shrink-0 w-1/2 sm:w-1/4 lg:w-1/6 h-96 flex items-center justify-center">
-                  <ProductCard product={product} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Why Choose Us */}
-      <section className="py-24 lg:py-36">
-        <div className="w-full max-w-none px-16">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-10">Why Choose Us?</h2>
+      <section className="py-16 lg:py-24 bg-[#130a17]">
+        <div className="w-full max-w-none px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-serif font-semibold mb-4 text-white">Why Choose Us?</h2>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16 md:gap-24 lg:gap-16 w-full">
             {[
               {
-                icon: <Star className="h-14 w-14 text-primary" />,
+                // icon: <Star className="h-14 w-14 text-primary" />,
                 title: 'Premium Quality',
                 description: 'High-quality materials and printing for lasting beauty',
               },
               {
-                icon: <span className="text-4xl">🎨</span>,
+                // icon: <span className="text-4xl">🎨</span>,
                 title: 'Custom Designs',
                 description: 'Personalized artwork tailored to your unique style',
               },
               {
-                icon: <span className="text-4xl">🚚</span>,
+                // icon: <span className="text-4xl">🚚</span>,
                 title: 'Fast Shipping',
                 description: 'Quick delivery to bring your vision to life sooner',
               },
               {
-                icon: <span className="text-4xl">💎</span>,
+                // icon: <span className="text-4xl">💎</span>,
                 title: 'Expert Craftsmanship',
                 description: 'Professionally crafted with attention to detail',
               },
@@ -277,7 +279,7 @@ export default function Index() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 lg:py-24" style={{ background: 'linear-gradient(90deg, #6d2997 0%, #3e206e 100%)' }}>
+      <section className="py-16 lg:py-24 bg-[#130a17]">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-serif font-semibold text-white mb-8">Ready to Transform Your Space?</h2>
           <p className="text-2xl md:text-3xl font-serif text-white/90 max-w-4xl mx-auto">
