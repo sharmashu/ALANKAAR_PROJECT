@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,12 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from '@/hooks/use-toast';
+import { getApiUrl } from '@/config/environment';
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, total, clearCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('card');
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -27,7 +26,7 @@ export default function Checkout() {
     pincode: '',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
@@ -38,22 +37,43 @@ export default function Checkout() {
     e.preventDefault();
     setIsLoading(true);
 
+    // Validate required fields
+    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state'];
+    for (const field of requiredFields) {
+      if (!formData[field]) {
+        toast({
+          title: 'Missing Information',
+          description: 'Please fill all required fields.',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      // Send order details to backend to email admin and get orderNumber
+      const response = await fetch(getApiUrl('/orders/send-order-email'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          items,
+          total: total + 99,
+        }),
+      });
+      const data = await response.json();
       clearCart();
       toast({
-        title: "Order placed successfully!",
-        description: "You will receive a confirmation email shortly.",
+        title: 'Order placed successfully!',
+        description: 'You will receive a confirmation email shortly.',
       });
-      
-      navigate('/order-success');
+      navigate('/order-success', { state: { orderNumber: data.orderNumber } });
     } catch (error) {
       toast({
-        title: "Order failed",
-        description: "Please try again.",
-        variant: "destructive",
+        title: 'Order failed',
+        description: 'Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -74,7 +94,6 @@ export default function Checkout() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Checkout</h1>
-      
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Shipping Information */}
@@ -106,7 +125,6 @@ export default function Checkout() {
                     />
                   </div>
                 </div>
-                
                 <div>
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -118,7 +136,6 @@ export default function Checkout() {
                     required
                   />
                 </div>
-                
                 <div>
                   <Label htmlFor="phone">Phone</Label>
                   <Input
@@ -129,7 +146,6 @@ export default function Checkout() {
                     required
                   />
                 </div>
-                
                 <div>
                   <Label htmlFor="address">Address</Label>
                   <Input
@@ -140,7 +156,6 @@ export default function Checkout() {
                     required
                   />
                 </div>
-                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="city">City</Label>
@@ -154,19 +169,15 @@ export default function Checkout() {
                   </div>
                   <div>
                     <Label htmlFor="state">State</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select State" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="delhi">Delhi</SelectItem>
-                        <SelectItem value="mumbai">Mumbai</SelectItem>
-                        <SelectItem value="bangalore">Bangalore</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      id="state"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </div>
                 </div>
-                
                 <div>
                   <Label htmlFor="pincode">PIN Code</Label>
                   <Input
@@ -179,50 +190,7 @@ export default function Checkout() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Payment Method */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Method</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="card" id="card" />
-                    <Label htmlFor="card">Credit/Debit Card</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="upi" id="upi" />
-                    <Label htmlFor="upi">UPI</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="cod" id="cod" />
-                    <Label htmlFor="cod">Cash on Delivery</Label>
-                  </div>
-                </RadioGroup>
-
-                {paymentMethod === 'card' && (
-                  <div className="mt-4 space-y-4">
-                    <div>
-                      <Label htmlFor="cardNumber">Card Number</Label>
-                      <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="expiry">Expiry Date</Label>
-                        <Input id="expiry" placeholder="MM/YY" />
-                      </div>
-                      <div>
-                        <Label htmlFor="cvv">CVV</Label>
-                        <Input id="cvv" placeholder="123" />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
-
           {/* Order Summary */}
           <div>
             <Card className="sticky top-24">
@@ -241,7 +209,6 @@ export default function Checkout() {
                     <span>₹{item.price * item.quantity}</span>
                   </div>
                 ))}
-                
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
@@ -256,9 +223,8 @@ export default function Checkout() {
                     <span>₹{total + 99}</span>
                   </div>
                 </div>
-                
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Processing..." : "Place Order"}
+                  {isLoading ? 'Processing...' : 'Place Order'}
                 </Button>
               </CardContent>
             </Card>

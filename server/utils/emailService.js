@@ -160,4 +160,63 @@ export const sendPasswordResetEmail = async (email, name, token) => {
     });
     throw error;
   }
+};
+
+// Send order details email to admin
+export const sendOrderDetailsEmail = async (orderDetails) => {
+  try {
+    const transporter = createTransporter();
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: 'info.alankaarco@gmail.com',
+      subject: `New Order Received - ALANKAAR`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto;">
+          <h2 style="color: #333;">New Order Received</h2>
+          <h3>Customer Details</h3>
+          <ul>
+            <li><b>Name:</b> ${orderDetails.firstName || ''} ${orderDetails.lastName || ''}</li>
+            <li><b>Email:</b> ${orderDetails.email}</li>
+            <li><b>Phone:</b> ${orderDetails.phone}</li>
+            <li><b>Address:</b> ${orderDetails.address}</li>
+            <li><b>City:</b> ${orderDetails.city}</li>
+            <li><b>State:</b> ${orderDetails.state}</li>
+            <li><b>PIN Code:</b> ${orderDetails.pincode}</li>
+          </ul>
+          <h3>Order Details</h3>
+          <ul>
+            <li><b>Total:</b> ₹${orderDetails.total}</li>
+            <li><b>Order Date:</b> ${new Date().toLocaleString()}</li>
+          </ul>
+          <h3>Cart Items</h3>
+          <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Size</th>
+                <th>Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orderDetails.items.map(item => `
+                <tr>
+                  <td>${item.name}</td>
+                  <td>${item.quantity}</td>
+                  <td>${item.size || '-'}</td>
+                  <td>₹${item.price}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `
+    };
+    await transporter.sendMail(mailOptions);
+    logger.info('Order details email sent to admin', { order: orderDetails });
+    return true;
+  } catch (error) {
+    logger.error('Failed to send order details email', { error: error.message });
+    throw error;
+  }
 }; 
