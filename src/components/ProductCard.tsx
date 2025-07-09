@@ -36,11 +36,11 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105">
       <Link to={`/product/${product._id}`}>
-        <div className="aspect-square overflow-hidden bg-muted">
+        <div className="aspect-square overflow-hidden bg-muted flex items-center justify-center">
           <img
             src={product.images?.[0] || '/placeholder.svg'}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            className="w-full h-full object-contain mx-auto my-auto transition-transform duration-300"
             onError={(e) => {
               if (!e.currentTarget.src.includes('placeholder.svg')) {
                 e.currentTarget.src = '/placeholder.svg';
@@ -50,28 +50,23 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </Link>
       
-      <CardContent className="p-4">
-        <div className="space-y-2">
-          <h3 className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2">
+      <CardContent className="p-5">
+        <div className="space-y-3">
+          <h3 className="font-semibold text-base md:text-lg group-hover:text-primary transition-colors line-clamp-2">
             {product.name}
           </h3>
-          
-          <p className="text-xs text-muted-foreground line-clamp-2">
+          <p className="text-sm text-muted-foreground line-clamp-2">
             {product.description}
           </p>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="font-bold text-primary">₹{product.price}</span>
-            </div>
-            
+          <div className="flex items-center justify-between pt-2">
+            <span className="font-bold text-primary text-base md:text-lg">₹{product.price}</span>
             <Button
               size="sm"
               variant="outline"
               className="h-8 w-8 p-0"
               onClick={handleAddToCart}
             >
-              <ShoppingCart className="h-3 w-3" />
+              <ShoppingCart className="h-4 w-4" />
             </Button>
           </div>
         </div>
