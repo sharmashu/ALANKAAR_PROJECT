@@ -27,6 +27,7 @@ import AdminProducts from "./pages/admin/Products";
 import AdminOrders from "./pages/admin/Orders";
 import AdminUsers from "./pages/admin/Users";
 import AdminSettings from "./pages/admin/Settings";
+import Orders from "./pages/Orders";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +69,7 @@ const App = () => (
                           <Route path="/login" element={<Login />} />
                           <Route path="/verify-email" element={<VerifyEmail />} />
                           <Route path="/order-success" element={<OrderSuccess />} />
+                          <Route path="/orders" element={<Orders />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
