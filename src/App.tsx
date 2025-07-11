@@ -29,6 +29,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminSettings from "./pages/admin/Settings";
 import Orders from "./pages/Orders";
 import { useEffect } from "react";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -79,7 +80,11 @@ const App = () => {
                   }} />
                   <Routes>
                     {/* Admin Routes */}
-                    <Route path="/admin" element={<AdminLayout />}>
+                    <Route path="/admin" element={
+                      <ProtectedRoute requireAdmin>
+                        <AdminLayout />
+                      </ProtectedRoute>
+                    }>
                       <Route index element={<AdminDashboard />} />
                       <Route path="products" element={<AdminProducts />} />
                       <Route path="orders" element={<AdminOrders />} />

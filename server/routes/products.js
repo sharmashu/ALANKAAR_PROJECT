@@ -1,6 +1,7 @@
 import express from 'express';
 import Product from '../models/Product.js';
 import auth from '../middleware/auth.js';
+import admin from '../middleware/admin.js';
 import { seedProducts } from '../data/sampleProducts.js';
 
 const router = express.Router();
@@ -28,21 +29,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Seed database with sample products
-router.post('/seed', async (req, res) => {
-  try {
-    const insertedProducts = await seedProducts();
-    res.status(201).json({ 
-      message: `Successfully seeded ${insertedProducts.length} products`,
-      count: insertedProducts.length 
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Create a product
-router.post('/', auth, async (req, res) => {
+// Create a product (admin only)
+router.post('/', admin, async (req, res) => {
   try {
     const product = new Product(req.body);
     await product.save();
@@ -52,8 +40,8 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// Update a product
-router.put('/:id', auth, async (req, res) => {
+// Update a product (admin only)
+router.put('/:id', admin, async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!product) {
@@ -65,8 +53,8 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
-// Delete a product
-router.delete('/:id', auth, async (req, res) => {
+// Delete a product (admin only)
+router.delete('/:id', admin, async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {

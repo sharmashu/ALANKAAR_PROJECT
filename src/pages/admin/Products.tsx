@@ -19,7 +19,6 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
-    _id: '',
     id: '',
     name: '',
     price: '',
