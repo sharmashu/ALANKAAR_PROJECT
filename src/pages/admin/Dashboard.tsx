@@ -1,23 +1,57 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, ShoppingCart, Users, DollarSign, TrendingUp, AlertTriangle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
 
 export default function AdminDashboard() {
-  // Mock data - replace with actual API calls
-  const stats = {
-    totalProducts: 156,
-    totalOrders: 89,
-    totalUsers: 234,
-    totalRevenue: 45670,
-    monthlyGrowth: 12.5,
-    lowStockItems: 8
-  };
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalOrders: 0,
+    totalUsers: 0,
+    totalRevenue: 0,
+    monthlyGrowth: 0,
+    lowStockItems: 0,
+  });
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const recentOrders = [
-    { id: 'ORD-001', customer: 'John Doe', amount: 299, status: 'Processing' },
-    { id: 'ORD-002', customer: 'Jane Smith', amount: 499, status: 'Shipped' },
-    { id: 'ORD-003', customer: 'Mike Johnson', amount: 199, status: 'Delivered' },
-  ];
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        setLoading(true);
+        setError(null);
+        const [products, orders, users] = await Promise.all([
+          api.get('/products'),
+          api.get('/orders'),
+          api.get('/users'),
+        ]);
+        setStats({
+          totalProducts: products.length,
+          totalOrders: orders.length,
+          totalUsers: users.length,
+          totalRevenue: orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0),
+          monthlyGrowth: 0, // Add your logic here if needed
+          lowStockItems: products.filter((p: any) => p.stock && p.stock < 5).length,
+        });
+        // Show the most recent 3 orders
+        setRecentOrders(orders.slice(-3).reverse());
+      } catch (err: any) {
+        setError('Failed to fetch dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return <div className="p-8 text-center">Loading dashboard...</div>;
+  }
+  if (error) {
+    return <div className="p-8 text-center text-red-500">{error}</div>;
+  }
 
   return (
     <div className="space-y-6">

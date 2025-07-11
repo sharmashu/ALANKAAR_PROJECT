@@ -4,9 +4,8 @@ import { ArrowRight, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ProductCard } from '@/components/ProductCard';
-import { categories, featuredProducts } from '@/data/mockData';
+// import { categories, featuredProducts } from '@/data/mockData';
 import { ProductSlider } from '@/components/ProductSlider';
-import { AuthTest } from '@/components/AuthTest';
 
 // Define the Product interface
 interface Product {
@@ -112,17 +111,7 @@ export default function Index() {
     return { posterGallery1: gallery1, posterGallery2: gallery2 };
   }, [carouselImages]);
 
-  const offers = [
-    "BUY 4 GET 3 FREE!",
-    "BUY 5 GET 5 FREE!",
-    "BUY 6 GET 12 FREE!",
-    "BUY 10 GET 20 FREE!",
-    "BUY 20 GET 50 FREE!",
-    "FREE DELIVERY FOR PREPAID ORDERS!",
-    "BUY 4 GET 3 FREE!",
-    "BUY 5 GET 5 FREE!",
-    "BUY 6 GET 12 FREE!",
-  ];
+  console.log('Homepage products:', products);
 
   // Function to clear cache (useful for development or when data is stale)
   const clearCache = () => {
@@ -164,9 +153,9 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen bg-[#130a17]">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-[400px] bg-[#130a17] flex items-center justify-center py-6 lg:py-7">
+      <section className="relative min-h-[400px] flex items-center justify-center py-6 lg:py-7">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-4 gap-8">
           {/* Left: Heading and Tagline */}
           <div className="flex-1 flex flex-col justify-center max-w-md text-left ml-8">
@@ -188,7 +177,7 @@ export default function Index() {
       </section>
       
       {/* Best Sellers - Now using real products from backend */}
-      <section className="py-16 lg:py-24 bg-[#130a17]">
+      <section className="py-16 lg:py-24">
         <div className="w-full max-w-none px-0">
           <div className="text-center mb-4">
             <h2 className="text-3xl font-serif font-semibold mb-4 text-white">Best Sellers</h2>
@@ -210,7 +199,7 @@ export default function Index() {
       </section>
 
       {/* Featured Categories */}
-      <section className="py-16 lg:py-24 bg-[#130a17]">
+      <section className="py-16 lg:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-serif font-semibold mb-4 text-white">Featured Categories</h2>
@@ -238,7 +227,7 @@ export default function Index() {
 
 
       {/* Why Choose Us */}
-      <section className="py-16 lg:py-24 bg-[#130a17]">
+      <section className="py-16 lg:py-24">
         <div className="w-full max-w-none px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-serif font-semibold mb-4 text-white">Why Choose Us?</h2>
@@ -269,7 +258,12 @@ export default function Index() {
             ].map((feature, index) => (
               <Card key={index} className="text-center p-10 hover:shadow-lg transition-shadow scale-105 lg:scale-110">
                 <CardContent className="space-y-6">
-                  <div className="flex justify-center">{feature.icon}</div>
+                  <div className="flex justify-center">
+                    {index === 0 && <Star className="h-14 w-14 text-primary" />}
+                    {index === 1 && <span className="text-4xl">🎨</span>}
+                    {index === 2 && <span className="text-4xl">🚚</span>}
+                    {index === 3 && <span className="text-4xl">💎</span>}
+                  </div>
                   <h3 className="font-semibold text-2xl mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground text-lg">{feature.description}</p>
                 </CardContent>
@@ -280,19 +274,12 @@ export default function Index() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 lg:py-24 bg-[#130a17]">
+      <section className="py-16 lg:py-24">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-serif font-semibold text-white mb-8">Ready to Transform Your Space?</h2>
           <p className="text-2xl md:text-3xl font-serif text-white/90 max-w-4xl mx-auto">
             Join thousands of satisfied customers who have transformed their homes with our premium art collection.
           </p>
-        </div>
-      </section>
-
-      {/* JWT Authentication Test - Temporary for testing */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <AuthTest />
         </div>
       </section>
     </div>
