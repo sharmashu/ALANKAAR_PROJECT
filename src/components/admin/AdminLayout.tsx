@@ -20,19 +20,16 @@ export function AdminLayout() {
   const { logout } = useAuth();
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Home', href: '/', icon: LayoutDashboard },
     { name: 'Products', href: '/admin/products', icon: Package },
-    { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
-    { name: 'Users', href: '/admin/users', icon: Users },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-#130a17 flex">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-white shadow-lg transition-all duration-300 flex flex-col`}>
+      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-130a17 shadow-lg transition-all duration-300 flex flex-col`}>
         {/* Header */}
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
@@ -85,7 +82,7 @@ export function AdminLayout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <header className="bg-white shadow-sm border-b px-6 py-4">
+        <header className="bg-130a17 shadow-sm border-b px-6 py-4">
           <h2 className="text-2xl font-semibold text-gray-800">
             Admin Dashboard
           </h2>

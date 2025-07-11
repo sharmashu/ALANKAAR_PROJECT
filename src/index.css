@@ -7,7 +7,7 @@
 @layer base {
   :root {
     --background: 290 22% 7%;
-    --foreground: 0 0% 10%;
+    --foreground: 0 0% 95%;
 
     --card: 0 0% 97.5%;
     --card-foreground: 0 0% 10%;
@@ -81,6 +81,37 @@
 
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+    position: relative;
+  }
+
+  /* Galaxy dots background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(2px 2px at 20px 30px, hsl(var(--foreground) / 0.3), transparent),
+      radial-gradient(2px 2px at 40px 70px, hsl(var(--foreground) / 0.2), transparent),
+      radial-gradient(1px 1px at 90px 40px, hsl(var(--foreground) / 0.4), transparent),
+      radial-gradient(1px 1px at 130px 80px, hsl(var(--foreground) / 0.3), transparent),
+      radial-gradient(2px 2px at 160px 30px, hsl(var(--foreground) / 0.2), transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: galaxyMove 10s linear infinite;
+    z-index: -1;
+    pointer-events: auto;
+  }
+
+  @keyframes galaxyMove {
+    0% {
+      transform: translateY(0px);
+    }
+    100% {
+      transform: translateY(-100px);
+    }
   }
 }
 

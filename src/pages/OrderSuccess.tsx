@@ -3,7 +3,7 @@ import { CheckCircle, Download, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
-const EMAIL_USER = import.meta.env.VITE_EMAIL_USER || 'info@alankaar.com';
+const EMAIL_USER = import.meta.env.VITE_EMAIL_USER || 'info.alankaarco@gmail.com';
 
 export default function OrderSuccess() {
   const location = useLocation();
@@ -79,7 +79,7 @@ export default function OrderSuccess() {
               Download Invoice
             </Button>
             <Button variant="outline">
-              Track Order
+            <Link to="/orders">Track Order</Link>
             </Button>
           </div>
           
